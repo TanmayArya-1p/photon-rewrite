@@ -1,10 +1,15 @@
 import axios from 'axios';
 import {SERVER_URL} from "./config.json"
+import { use } from 'react';
+import { userStore , sessionStore } from './stores';
+
+
 const FormData = require('form-data');
 
 
 
-async function login(uid,pwd) {
+async function login(pwd) {
+    let uid = userStore.getState().uid;
     let data = new FormData();
     data.append('uid', uid);
     data.append('password', pwd);
@@ -22,6 +27,7 @@ async function login(uid,pwd) {
     axios.request(config)
     .then((response) => {
         console.log(JSON.stringify(response.data));
+        userStore.setState({secret: response.data["ClientSecret"]})
         return true
     })
     .catch((error) => {
@@ -49,6 +55,7 @@ async function register(username,password) {
     axios.request(config)
     .then((response) => {
     console.log(JSON.stringify(response.data));
+        userStore.setState({uid: response.data["UID"] , secret: response.data["ClientSecret"]})
         return response.data
         //ClientSecret
         //UID
@@ -61,8 +68,10 @@ async function register(username,password) {
 
 
 
-async function joinSession(uid,secret,sesKey , sesID) {
+async function joinSession(sesID , sesKey) {
     let data = new FormData();
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
     data.append('key', sesKey);
 
     let config = {
@@ -80,6 +89,7 @@ async function joinSession(uid,secret,sesKey , sesID) {
     axios.request(config)
     .then((response) => {
         console.log(JSON.stringify(response.data));
+        sessionStore.setState({sesID: sesID , sesKey: sesKey})
         return response.data
     })
     .catch((error) => {
@@ -90,12 +100,14 @@ async function joinSession(uid,secret,sesKey , sesID) {
 
 
 
-async function leaveSession(uid,secret) {
+async function leaveSession() {
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
     let data = new FormData();
     let config = {
     method: 'delete',
     maxBodyLength: Infinity,
-    url: SERVER_URL+'/session/leave?sid=67926b32e5fe7e9979ff2710',
+    url: SERVER_URL+'/session/leave?sid=' + sessionStore.getState().sesID,
     headers: { 
         'uid': uid, 
         'secret': secret,
@@ -107,6 +119,7 @@ async function leaveSession(uid,secret) {
     axios.request(config)
     .then((response) => {
     console.log(JSON.stringify(response.data));
+    sessionStore.setState({sesID: "" , sesKey: ""})
     })
     .catch((error) => {
     console.log(error);
@@ -116,7 +129,11 @@ async function leaveSession(uid,secret) {
 
 
 
-async function sessionMetadata(sid,uid,secret) {
+async function sessionMetadata() {
+    let sid = sessionStore.getState().sesID;
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
+
     let data = new FormData();
     let config = {
     method: 'get',
@@ -144,7 +161,11 @@ async function sessionMetadata(sid,uid,secret) {
 
 
 
-async function requestCreate(targetuid , uid, secret , sid , code, content) {
+async function requestCreate(targetuid , code, content) {
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
+    let sid = sessionStore.getState().sesID;
+
     let data = new FormData();
     data.append('to', targetuid);
     data.append('from', uid);
@@ -177,7 +198,11 @@ async function requestCreate(targetuid , uid, secret , sid , code, content) {
 
 
 
-async function requestGet(sid,uid,secret) {
+async function requestGet() {
+    let sid = sessionStore.getState().sesID;
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
+
     let data = new FormData();
 
     let config = {
@@ -205,7 +230,12 @@ async function requestGet(sid,uid,secret) {
 
 
 
-async function addressedRequests(sid,uid,secret) {
+async function addressedRequests() {
+    let sid = sessionStore.getState().sesID;
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
+
+
     let reqs = await requestGet(sid,uid,secret);
     let addressed = []
     for (let i = 0; i < reqs.length; i++) {
@@ -216,7 +246,10 @@ async function addressedRequests(sid,uid,secret) {
 }
 
 
-async function requestDelete(uid,sid,secret) {
+async function requestDelete() {
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
+    let sid = sessionStore.getState().sesID;
     let data = new FormData();
 
     let config = {
@@ -243,7 +276,12 @@ async function requestDelete(uid,sid,secret) {
 }
 
 
-async function pebbleCreate(sid,uid,hash,info,secret) {
+async function pebbleCreate(hash,info) {
+    let sid = sessionStore.getState().sesID;
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
+
+
     let data = new FormData();
     data.append('sid', sid);
     data.append('hash', hash);
@@ -275,7 +313,13 @@ async function pebbleCreate(sid,uid,hash,info,secret) {
 
 
 
-async function pebbleGet(sid,uid,secret,pid) {
+async function pebbleGet(pid) {
+
+    let sid = sessionStore.getState().sesID;
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
+
+
     let data = new FormData();
     data.append('sid', sid);
     data.append('pid', pid);
@@ -305,7 +349,12 @@ async function pebbleGet(sid,uid,secret,pid) {
 }
 
 
-async function pebbleFindSeed(uid,secret,sid,pid) {
+async function pebbleFindSeed(pid) {
+
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
+    let sid = sessionStore.getState().sesID;
+
     let data = new FormData();
     data.append('sid',sid);
     data.append('pid', pid);
@@ -321,7 +370,6 @@ async function pebbleFindSeed(uid,secret,sid,pid) {
     },
     data : data
     };
-
     axios.request(config)
     .then((response) => {
     console.log(JSON.stringify(response.data));
