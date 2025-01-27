@@ -18,16 +18,15 @@ async function login(uid,pwd) {
     data : data
     };
 
-    axios.request(config)
-    .then((response) => {
-        console.log(JSON.stringify(response.data));
-        userStore.setState({uid : uid , secret: response.data["ClientSecret"]})
-        return true
-    })
-    .catch((error) => {
-        console.log(error);
-        return false
-    });
+    try {
+        let resp = await axios.request(config)
+        userStore.setState({uid : uid , secret: resp.data["ClientSecret"]})
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
 }
 
 
@@ -46,18 +45,16 @@ async function register(username,password) {
     data : data
     };
 
-    axios.request(config)
-    .then((response) => {
-    console.log(JSON.stringify(response.data));
-        userStore.setState({uid: response.data["UID"] , secret: response.data["ClientSecret"]})
-        return response.data
-        //ClientSecret
-        //UID
-    })
-    .catch((error) => {
-    console.log(error);
-    return null
-    });
+
+    try {
+        let resp = await axios.request(config)
+        userStore.setState({uid: resp.data["UID"] , secret: resp.data["ClientSecret"]})
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
 }
 
 async function createSession(sesKey) {
@@ -78,14 +75,15 @@ async function createSession(sesKey) {
     data : data
     };
 
-    axios.request(config)
-    .then((response) => {
-        console.log(JSON.stringify(response.data));
-        sessionStore.setState({sesID: response.data["SessionID"] , sesKey: sesKey})
-    })
-    .catch((error) => {
-        console.log(error);
-    });
+    try {
+        let resp = await axios.request(config)
+        sessionStore.setState({sesID: resp.data["SessionID"] , sesKey: sesKey})
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
 
 }
 
@@ -107,16 +105,15 @@ async function joinSession(sesID , sesKey) {
     data : data
     };
 
-    axios.request(config)
-    .then((response) => {
-        console.log(JSON.stringify(response.data));
+    try {
+        let resp = await axios.request(config)
         sessionStore.setState({sesID: sesID , sesKey: sesKey})
-        return response.data
-    })
-    .catch((error) => {
-        console.log(error);
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
         return null
-    });
+    }
 }
 
 
@@ -137,14 +134,16 @@ async function leaveSession() {
     data : data
     };
 
-    axios.request(config)
-    .then((response) => {
-    console.log(JSON.stringify(response.data));
-    sessionStore.setState({sesID: "" , sesKey: ""})
-    })
-    .catch((error) => {
-    console.log(error);
-    });
+    try {
+        let resp = await axios.request(config)
+        sessionStore.setState({sesID: "" , sesKey: ""})
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
+
 }
 
 
@@ -168,15 +167,14 @@ async function sessionMetadata() {
     data : data
     };
 
-    axios.request(config)
-    .then((response) => {
-    console.log(JSON.stringify(response.data));
-    return response.data
-    })
-    .catch((error) => {
-    console.log(error);
-    return null
-    });
+    try {
+        let resp = await axios.request(config)
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
 
 }
 
@@ -205,16 +203,14 @@ async function requestCreate(targetuid , code, content) {
     data : data
     };
 
-    axios.request(config)
-    .then((response) => {
-    console.log(JSON.stringify(response.data));
-    return response.data
-    })
-    .catch((error) => {
-    console.log(error);
-    return null
-    });
-
+    try {
+        let resp = await axios.request(config)
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
 }
 
 
@@ -238,15 +234,14 @@ async function requestGet() {
     data : data
     };
 
-    axios.request(config)
-    .then((response) => {
-    console.log(JSON.stringify(response.data));
-    return response.data
-    })
-    .catch((error) => {
-    console.log(error);
-    return null
-    });
+    try {
+        let resp = await axios.request(config)
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
 }
 
 
@@ -285,15 +280,14 @@ async function requestDelete() {
     data : data
     };
 
-    axios.request(config)
-    .then((response) => {
-    console.log(JSON.stringify(response.data));
-    return response.data
-    })
-    .catch((error) => {
-    console.log(error);
-    return null
-    });
+    try {
+        let resp = await axios.request(config)
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
 }
 
 
@@ -302,16 +296,15 @@ async function pebbleCreate(hash,info) {
     let uid = userStore.getState().uid;
     let secret = userStore.getState().secret;
 
-
+    info = info + ` FROM{${uid}}`
     let data = new FormData();
-    data.append('sid', sid);
     data.append('hash', hash);
     data.append('info', info);
 
     let config = {
     method: 'post',
     maxBodyLength: Infinity,
-    url: SERVER_URL+'/pebble/create',
+    url: SERVER_URL+'/pebble?sid='+sid,
     headers: { 
         'uid': uid, 
         'secret': secret, 
@@ -320,15 +313,14 @@ async function pebbleCreate(hash,info) {
     data : data
     };
 
-    axios.request(config)
-    .then((response) => {
-    console.log(JSON.stringify(response.data));
-    return response.data
-    })
-    .catch((error) => {
-    console.log(error);
-    return null
-    });
+    try{
+        let resp = await axios.request(config)
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
 
 }
 
@@ -356,17 +348,14 @@ async function pebbleGet(pid) {
     },
     data : data
     };
-
-    axios.request(config)
-    .then((response) => {
-    console.log(JSON.stringify(response.data));
-    return response.data
-    })
-    .catch((error) => {
-    console.log(error);
-    return null
-    });
-
+    try {
+        let resp = await axios.request(config)
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
 }
 
 
@@ -391,15 +380,15 @@ async function pebbleFindSeed(pid) {
     },
     data : data
     };
-    axios.request(config)
-    .then((response) => {
-    console.log(JSON.stringify(response.data));
-    return response.data
-    })
-    .catch((error) => {
-    console.log(error);
-    return null;
-    });
+    try {
+        let resp = await axios.request(config)
+        return resp.data
+
+    }  
+    catch(e) {
+        console.log(e)
+        return null
+    }
 }
 
 
