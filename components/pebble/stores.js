@@ -26,10 +26,16 @@ const concernedRequestsStore = create((set) => ({
 }))
 
 const pebblesStore = create((set) => ({
-    pebbles : [],
+    pebbles : {},
     setPebbles: (pebbles) => set({ pebbles }),
 
 }))
 
 
-module.exports = {userStore , sessionStore , concernedRequestsStore , pebblesStore}
+const useDispatcherLastChecked = create((set) => ({
+    lastChecked : Date.now(),
+    setLastChecked: (lastChecked) => set({ lastChecked }),
+}))
+
+
+module.exports = {useDispatcherLastChecked , userStore , sessionStore , concernedRequestsStore , pebblesStore}

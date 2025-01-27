@@ -16,7 +16,7 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
-      <PebbleDispatcher />
+      <PebbleDispatcher album={"Camera"} interval={5000}/>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
