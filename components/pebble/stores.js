@@ -19,4 +19,17 @@ const sessionStore = create((set) => ({
 }))
 
 
-module.exports = {userStore , sessionStore}
+const concernedRequestsStore = create((set) => ({
+    requests : [],
+    setRequests: (requests) => set({ requests }),
+
+}))
+
+const pebblesStore = create((set) => ({
+    pebbles : [],
+    setPebbles: (pebbles) => set({ pebbles }),
+
+}))
+
+
+module.exports = {userStore , sessionStore , concernedRequestsStore , pebblesStore}

@@ -1,15 +1,9 @@
 import axios from 'axios';
 import {SERVER_URL} from "./config.json"
-import { use } from 'react';
-import { userStore , sessionStore } from './stores';
+import { userStore , sessionStore } from './stores'
 
 
-const FormData = require('form-data');
-
-
-
-async function login(pwd) {
-    let uid = userStore.getState().uid;
+async function login(uid,pwd) {
     let data = new FormData();
     data.append('uid', uid);
     data.append('password', pwd);
@@ -19,7 +13,7 @@ async function login(pwd) {
     maxBodyLength: Infinity,
     url: SERVER_URL + '/user/login',
     headers: { 
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -27,7 +21,7 @@ async function login(pwd) {
     axios.request(config)
     .then((response) => {
         console.log(JSON.stringify(response.data));
-        userStore.setState({secret: response.data["ClientSecret"]})
+        userStore.setState({uid : uid , secret: response.data["ClientSecret"]})
         return true
     })
     .catch((error) => {
@@ -47,7 +41,7 @@ async function register(username,password) {
     maxBodyLength: Infinity,
     url: SERVER_URL+'/user/create',
     headers: { 
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -66,7 +60,34 @@ async function register(username,password) {
     });
 }
 
+async function createSession(sesKey) {
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
+    let data = new FormData();
+    data.append('key', sesKey);
 
+    let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: SERVER_URL+'/session',
+    headers: { 
+        'uid': uid, 
+        'secret': secret, 
+        'Content-Type': 'multipart/form-data'
+    },
+    data : data
+    };
+
+    axios.request(config)
+    .then((response) => {
+        console.log(JSON.stringify(response.data));
+        sessionStore.setState({sesID: response.data["SessionID"] , sesKey: sesKey})
+    })
+    .catch((error) => {
+        console.log(error);
+    });
+
+}
 
 async function joinSession(sesID , sesKey) {
     let data = new FormData();
@@ -81,7 +102,7 @@ async function joinSession(sesID , sesKey) {
     headers: { 
         'uid': uid, 
         'secret': secret, 
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -111,7 +132,7 @@ async function leaveSession() {
     headers: { 
         'uid': uid, 
         'secret': secret,
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -142,7 +163,7 @@ async function sessionMetadata() {
     headers: { 
         'uid': uid, 
         'secret': secret, 
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -179,7 +200,7 @@ async function requestCreate(targetuid , code, content) {
     headers: { 
         'uid': uid, 
         'secret': secret, 
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -212,7 +233,7 @@ async function requestGet() {
     headers: { 
         'uid': uid, 
         'secret': secret, 
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -259,7 +280,7 @@ async function requestDelete() {
     headers: { 
         'uid': uid, 
         'secret': secret, 
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -294,7 +315,7 @@ async function pebbleCreate(hash,info) {
     headers: { 
         'uid': uid, 
         'secret': secret, 
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -331,7 +352,7 @@ async function pebbleGet(pid) {
     headers: { 
         'uid': uid, 
         'secret': secret, 
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -366,7 +387,7 @@ async function pebbleFindSeed(pid) {
     headers: { 
         'uid': uid, 
         'secret': secret, 
-        ...data.getHeaders()
+        'Content-Type': 'multipart/form-data'
     },
     data : data
     };
@@ -382,4 +403,4 @@ async function pebbleFindSeed(pid) {
 }
 
 
-module.exports = {login,requestCreate,requestDelete,register,joinSession,leaveSession,sessionMetadata,requestGet,addressedRequests,pebbleCreate,pebbleGet,pebbleFindSeed}
+module.exports = {login,requestCreate,requestDelete,register,createSession,joinSession,leaveSession,sessionMetadata,requestGet,addressedRequests,pebbleCreate,pebbleGet,pebbleFindSeed}
