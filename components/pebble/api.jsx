@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {SERVER_URL} from "./config.json"
-import { userStore , sessionStore } from './stores'
+import { userStore , sessionStore,useWebRTCStore } from './stores'
 
 
 async function login(uid,pwd) {
@@ -155,6 +155,7 @@ async function sessionMetadata() {
     let secret = userStore.getState().secret;
 
     let data = new FormData();
+    data.append("localSDP" , useWebRTCStore.getState().localSDP)
     let config = {
     method: 'get',
     maxBodyLength: Infinity,
@@ -325,6 +326,38 @@ async function pebbleCreate(hash,info) {
 }
 
 
+async function MakeMeSeed(pid) {
+    
+    let sid = sessionStore.getState().sesID;
+    let uid = userStore.getState().uid;
+    let secret = userStore.getState().secret;
+
+
+    let data = new FormData();
+    data.append('pid', pid);
+
+    let config = {
+    method: 'patch',
+    maxBodyLength: Infinity,
+    url: SERVER_URL+'/pebble/mms?sid='+sid,
+    headers: { 
+        'uid': uid, 
+        'secret': secret, 
+        'Content-Type': 'multipart/form-data'
+    },
+    data : data
+    };
+    try {
+        let resp = await axios.request(config)
+        return resp.data
+    }
+    catch(e) {
+        console.log(e)
+        return null
+    }
+}
+
+
 
 async function pebbleGet(pid) {
 
@@ -334,13 +367,12 @@ async function pebbleGet(pid) {
 
 
     let data = new FormData();
-    data.append('sid', sid);
     data.append('pid', pid);
 
     let config = {
-    method: 'post',
+    method: 'get',
     maxBodyLength: Infinity,
-    url: SERVER_URL+'/pebble/get',
+    url: SERVER_URL+'/pebble/get?sid='+sid,
     headers: { 
         'uid': uid, 
         'secret': secret, 
@@ -366,13 +398,12 @@ async function pebbleFindSeed(pid) {
     let sid = sessionStore.getState().sesID;
 
     let data = new FormData();
-    data.append('sid',sid);
     data.append('pid', pid);
 
     let config = {
     method: 'post',
     maxBodyLength: Infinity,
-    url: SERVER_URL+'/pebble/findSeed',
+    url: SERVER_URL+'/pebble/findSeed?sid='+sid,
     headers: { 
         'uid': uid, 
         'secret': secret, 

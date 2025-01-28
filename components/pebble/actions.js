@@ -1,5 +1,5 @@
 import * as api from './api.jsx';
-import {pebbleStore} from './stores.js';
+import {pebbleStore , Waiting , useWebRTCStore} from './stores.js';
 
 
 async function AppendNewImage(asset) {
@@ -10,5 +10,36 @@ async function AppendNewImage(asset) {
 }
 
 
+async function BegSeeder(seeder,pebble) {
+    console.log("FOUND SEEDER" , seeder)
+    const { setRemoteSDP } = useWebRTCStore.getState();
+    await setRemoteSDP(seeder.localSDP);
+    const {localSDP} = useWebRTCStore.getState();
+    let resp = await api.requestCreate(seeder.id, "SETANSSDP" , localSDP )
+    Waiting.setState({waiting : true})
+    WaitDownload(pebble)
+    return resp
+}
+
+
+async function WaitDownload(pebble) {
+    const { peerConnection } = useWebRTCStore.getState();
+  
+    peerConnection.ondatachannel = (event) => {
+      const receiveChannel = event.channel;
+      receiveChannel.onmessage = (event) => {
+        const receivedData = event.data;
+        console.log("Received data:", receivedData);
+        //tetsing
+
+
+        pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebble.id]: "newpebblelol"}})
+        api.
+        Waiting.setState({waiting : false})
+        
+      };
+    };
+
+}
 
 module.exports = {AppendNewImage}
