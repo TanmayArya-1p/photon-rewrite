@@ -27,16 +27,20 @@ async function WaitDownload(pebble) {
   
     peerConnection.ondatachannel = (event) => {
       const receiveChannel = event.channel;
-      receiveChannel.onmessage = (event) => {
+      receiveChannel.onmessage = async (event) => {
         const receivedData = event.data;
-        console.log("Received data:", receivedData);
-        //tetsing
-
-
-        pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebble.id]: "newpebblelol"}})
-        api.MakeMeSeed(pebble.id)
-        Waiting.setState({waiting : false})
-        
+        console.log("Received data:", receivedData)
+        if (typeof receivedData === 'string' && receivedData === 'EOF') {
+          const blob = new Blob(receivedBuffers,{ type: 'image/jpeg' });
+          const tempFilePath = FileSystem.documentDirectory + 'tempFile';
+          await FileSystem.writeAsStringAsync(tempFilePath, blob);
+          receivedBuffers = [];
+          pebbleStore.setState({ pebbles: { ...pebbleStore.getState().pebbles, [pebble.id]: "newpebblelol" } });
+          api.MakeMeSeed(pebble.id);
+          Waiting.setState({ waiting: false });
+        } else {
+            receivedBuffers.push(receivedData);
+        }        
       };
     };
 
