@@ -34,7 +34,7 @@ async function WaitDownload(pebble) {
 
 
         pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebble.id]: "newpebblelol"}})
-        api.
+        api.MakeMeSeed(pebble.id)
         Waiting.setState({waiting : false})
         
       };
