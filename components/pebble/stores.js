@@ -50,16 +50,15 @@ const useLocalSDP = create((set) => ({
 }))
 
 
-const StagedPebbles = create((set) => ({
+const stagedPebbles = create((set) => ({
     stagedPebbles : [],
     setStagedPebbles: (stagedPebbles) => set({ stagedPebbles }),
 }))
 
 const Waiting = create((set) => ({
-    waiting : false,
-    setWaiting: (waiting) => set({ waiting }),
-}))
-
+  waiting: false,
+  setWaiting: (waiting) => set({ waiting }),
+}));
 
 const useWebRTCStore = create((set) => ({
     localSDP: "",
@@ -91,4 +90,4 @@ const useWebRTCStore = create((set) => ({
     },
   }));
 
-module.exports = {useWebRTCStore,useLocalSDP,StagedPebbles,useDispatcherLastChecked , userStore , sessionStore , concernedRequestsStore , pebbleStore , Waiting}
+module.exports = {useWebRTCStore,useLocalSDP,stagedPebbles,useDispatcherLastChecked , userStore , sessionStore , concernedRequestsStore , pebbleStore , Waiting}

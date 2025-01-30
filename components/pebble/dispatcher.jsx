@@ -3,11 +3,9 @@ import * as api from './api';
 import * as MediaLibrary from 'expo-media-library';
 import {useDispatcherLastChecked} from "./stores"
 import * as actions from "./actions"
-import {pebbleStore , stagedPebbles,useWebRTCStore} from "./stores"
+import {pebbleStore , stagedPebbles,useWebRTCStore, Waiting} from "./stores"
 
 //have a background taskas well as set itnerval
-
-
 export default function PebbleDispatcher({album , interval}) {
     const [_, requestPermission] = MediaLibrary.usePermissions();
     const [lastChecked , setLastChecked] = useState(Date.now())
@@ -29,35 +27,44 @@ export default function PebbleDispatcher({album , interval}) {
 
     async function Poller(albumObj) {
 
-
         //NEED TO CHECK FOR NEW IMAGES ON SERVER
-
-        if(!Waiting.getState().waiting) {
-            let pebStoreVal = pebbleStore.getState().pebbleStore
-            let alreadyDispatched = stagedPebbles.getState().stagedPebbles
-            let smeta = api.sessionMetadata()
-            let pebs = smeta.pebbles
-    
-            
-            for(let i=0; i< pebs.length ; i++) {
-                if(Waiting.getState().waiting) {
-                    break
-                }
-                if (!pebStoreVal.has(pebs[i].id) && !alreadyDispatched.includes(pebs[i].id)) {
-                    console.log("FINDING SEEDER FOR", pebs[i].id)
-                    let seeder = await api.pebbleFindSeed(pebs[i].id)
-                    if(seeder.Found == false) {
-                        console.log("NO SEEDER FOUND FOR", pebs[i].id)
-                        continue
+        
+        let wait = await Waiting.getState()
+        let pebStoreVal = await pebbleStore.getState().pebbles
+        let alreadyDispatched = await stagedPebbles.getState().stagedPebbles
+        console.log("Local Pebbles:", Object.keys(pebStoreVal));
+        try {
+            if(!wait.waiting) {
+                // let pebStoreVal = pebbleStore.getState().pebbleStore
+                // let alreadyDispatched = stagedPebbles.getState().stagedPebbles
+                let smeta = await api.sessionMetadata()
+                let pebs = smeta.pebbles
+        
+                
+                for(let i=0; i< pebs.length ; i++) {
+                    if(wait.waiting) {
+                        break
                     }
-                    alreadyDispatched.push(pebs[i].id)
-                    await actions.BegSeeder(seeder)
-                }
-            }    
+                    if (!pebStoreVal[pebs[i].id] && !alreadyDispatched.includes(pebs[i].id)) {
+                        console.log("FINDING SEEDER FOR", pebs[i].id)
+                        let seeder = await api.pebbleFindSeed(pebs[i].id)
+                        if(seeder.Found == false) {
+                            console.log("NO SEEDER FOUND FOR", pebs[i].id)
+                            continue
+                        }
+                        alreadyDispatched.push(pebs[i].id)
+                        await actions.BegSeeder(seeder)
+                    }
+                }    
+            }
+    
+
+        }
+        catch(e) {
+            console.log("ERROR POLLING SERVER" , e)
         }
 
-
-        
+        console.log("HERE")
         //CHECKING NEW IMAGES LOCALLY PART
         setLastChecked(async (prevLastChecked) => {
             let lc = await prevLastChecked;
@@ -115,10 +122,10 @@ export default function PebbleDispatcher({album , interval}) {
         startup()
         return () => clearInterval(pollerIntId)
     } , [])
-
+    const { resetWebRTCClient } = useWebRTCStore();
     
     useEffect(()=> {
-        const { resetWebRTCClient } = useWebRTCStore();
+       
         resetWebRTCClient();    
     },[])
 
