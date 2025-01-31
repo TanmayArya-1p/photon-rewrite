@@ -11,16 +11,14 @@ async function AppendNewImage(asset) {
 
 
 async function BegSeeder(seeder,pebble) {
-    console.log("FOUND SEEDER" , seeder.Seed.sdp)
+    console.log("FOUND SEEDER" , seeder.Seed)
     let resp = null
     try {    
       const { setRemoteSDP } = useWebRTCStore.getState();
       await setRemoteSDP(seeder.Seed.sdp);
-      console.log("BEFORE REQ")
       const {localSDP} = useWebRTCStore.getState();
 
       resp = await api.requestCreate(seeder.Seed.id, "SETANSSDP" , localSDP )
-      console.log("AFTER REQ")
       Waiting.setState({waiting : true})
       WaitDownload(pebble)
     } catch(e) {
