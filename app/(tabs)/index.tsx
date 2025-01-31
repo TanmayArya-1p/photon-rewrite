@@ -6,18 +6,24 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import PebbleDispatcher from "@/components/pebble/dispatcher"
 import * as api from "@/components/pebble/api"
+import * as Device from 'expo-device';
+
 
 export default function HomeScreen() {
 
   const [done,setDone] = useState(false)
   const [uid,setUid] = useState("")
   useEffect(() => {
-    if(uid!=""){
-      api.login(uid , "123").then((res: any) => {
-        console.log(res)
-      });
-
+    console.log("DEVICE ID" , Device.manufacturer)
+    if(Device.manufacturer == "vivo"){
+      setUid("679c0fb769d549b92faa4401")
+    } else {
+      setUid("679c0fd569d549b92faa4402")
     }
+    api.login(uid , "123").then((res: any) => {
+      console.log(res)
+    });
+    setDone(true)
 
   },[uid])
 

@@ -99,8 +99,10 @@ export default function PebbleDispatcher({album , interval}) {
             try{
                 //await api.login("6797bb2bdd1ec3f885a9de6d", "123")
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                await sessionStore.setState({sesID: "679c059269d549b92faa43ff"})
-                //await api.joinSession("679c059269d549b92faa43ff" , "123")
+                //await api.createSession("123")
+                await api.joinSession("679c1be0c164c81ac770449b" , "123")
+                await sessionStore.setState({sesID: "679c1be0c164c81ac770449b"})
+
             }
             catch(e) {
                 console.log(e)

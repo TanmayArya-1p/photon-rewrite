@@ -206,9 +206,12 @@ async function requestCreate(targetuid , code, content) {
 
     try {
         let resp = await axios.request(config)
+        console.log("CREATED REQUEST" , resp.data)
         return resp.data
+
     }
     catch(e) {
+        console.log("FAILED TO CREATE REQUEST")
         console.log(e)
         return null
     }

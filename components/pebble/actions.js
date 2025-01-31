@@ -11,39 +11,84 @@ async function AppendNewImage(asset) {
 
 
 async function BegSeeder(seeder,pebble) {
-    console.log("FOUND SEEDER" , seeder)
-    const { setRemoteSDP } = useWebRTCStore.getState();
-    await setRemoteSDP(seeder.sdp);
-    const {localSDP} = useWebRTCStore.getState();
-    let resp = await api.requestCreate(seeder.id, "SETANSSDP" , localSDP )
-    Waiting.setState({waiting : true})
-    WaitDownload(pebble)
+    console.log("FOUND SEEDER" , seeder.Seed.sdp)
+    let resp = null
+    try {    
+      const { setRemoteSDP } = useWebRTCStore.getState();
+      await setRemoteSDP(seeder.Seed.sdp);
+      console.log("BEFORE REQ")
+      const {localSDP} = useWebRTCStore.getState();
+
+      resp = await api.requestCreate(seeder.Seed.id, "SETANSSDP" , localSDP )
+      console.log("AFTER REQ")
+      Waiting.setState({waiting : true})
+      WaitDownload(pebble)
+    } catch(e) {
+      console.log("ERROR BEGGING SEEDER" , e)
+    }
+
     return resp
 }
 
 
 async function WaitDownload(pebble) {
-    const { peerConnection } = useWebRTCStore.getState();
+  let receivedBuffers = [];
+  const { peerConnection } = useWebRTCStore.getState();
   
+  if (!peerConnection) {
+    throw new Error("PeerConnection not initialized");
+  }
+
+  return new Promise((resolve, reject) => {
     peerConnection.ondatachannel = (event) => {
       const receiveChannel = event.channel;
+      console.log("Received data channel:", receiveChannel.label);
+
+      receiveChannel.onopen = () => {
+        console.log("Receive channel opened");
+      };
+
+      receiveChannel.onerror = (error) => {
+        console.error("Receive channel error:", error);
+        reject(error);
+      };
+
       receiveChannel.onmessage = async (event) => {
-        const receivedData = event.data;
-        console.log("Received data:", receivedData)
-        if (typeof receivedData === 'string' && receivedData === 'EOF') {
-          const blob = new Blob(receivedBuffers,{ type: 'image/jpeg' });
-          const tempFilePath = FileSystem.documentDirectory + 'tempFile';
-          await FileSystem.writeAsStringAsync(tempFilePath, blob);
-          receivedBuffers = [];
-          pebbleStore.setState({ pebbles: { ...pebbleStore.getState().pebbles, [pebble.id]: "newpebblelol" } });
-          api.MakeMeSeed(pebble.id);
-          Waiting.setState({ waiting: false });
-        } else {
+        try {
+          const receivedData = event.data;
+          console.log("Received data chunk of size:", receivedData.size || receivedData.length);
+
+          if (typeof receivedData === 'string' && receivedData === 'EOF') {
+            const blob = new Blob(receivedBuffers, { type: 'image/jpeg' });
+            const tempFilePath = FileSystem.documentDirectory + 'tempFile';
+            
+            await FileSystem.writeAsStringAsync(tempFilePath, blob);
+            receivedBuffers = []; // Clear the buffer
+
+            pebbleStore.setState({ 
+              pebbles: { 
+                ...pebbleStore.getState().pebbles, 
+                [pebble.id]: "newpebblelol" 
+              } 
+            });
+
+            await api.MakeMeSeed(pebble.id);
+            Waiting.setState({ waiting: false });
+            resolve(tempFilePath);
+          } else {
             receivedBuffers.push(receivedData);
-        }        
+          }
+        } catch (error) {
+          console.error("Error processing received data:", error);
+          reject(error);
+        }
+      };
+
+      receiveChannel.onclose = () => {
+        console.log("Receive channel closed");
       };
     };
-
+  });
 }
 
 module.exports = {AppendNewImage , BegSeeder}
