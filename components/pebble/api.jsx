@@ -21,10 +21,10 @@ async function login(uid,pwd) {
     try {
         let resp = await axios.request(config)
         userStore.setState({uid : uid , secret: resp.data["ClientSecret"]})
+        console.log(resp.data)
         return resp.data
     }
     catch(e) {
-        console.log(e)
         return null
     }
 }
@@ -111,7 +111,7 @@ async function joinSession(sesID , sesKey) {
         return resp.data
     }
     catch(e) {
-        console.log(e)
+
         return null
     }
 }
@@ -155,9 +155,11 @@ async function sessionMetadata() {
     let secret = userStore.getState().secret;
 
     let data = new FormData();
-    data.append("localSDP" , useWebRTCStore.getState().localSDP)
+    let sdp = await useWebRTCStore.getState()
+
+    data.append("localSDP" , sdp.localSDP)
     let config = {
-    method: 'get',
+    method: 'put',
     maxBodyLength: Infinity,
     url: SERVER_URL+'/session?sid=' + sid,
     headers: { 
@@ -167,13 +169,11 @@ async function sessionMetadata() {
     },
     data : data
     };
-
     try {
         let resp = await axios.request(config)
         return resp.data
     }
     catch(e) {
-        console.log(e)
         return null
     }
 
@@ -401,15 +401,14 @@ async function pebbleFindSeed(pid) {
     data.append('pid', pid);
 
     let config = {
-    method: 'post',
+    method: 'get',
     maxBodyLength: Infinity,
-    url: SERVER_URL+'/pebble/findSeed?sid='+sid,
+    url: SERVER_URL+'/pebble/findSeed?sid='+sid+'&pid='+pid,
     headers: { 
         'uid': uid, 
         'secret': secret, 
         'Content-Type': 'multipart/form-data'
-    },
-    data : data
+    }
     };
     try {
         let resp = await axios.request(config)

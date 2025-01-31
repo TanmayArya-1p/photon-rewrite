@@ -13,7 +13,7 @@ async function AppendNewImage(asset) {
 async function BegSeeder(seeder,pebble) {
     console.log("FOUND SEEDER" , seeder)
     const { setRemoteSDP } = useWebRTCStore.getState();
-    await setRemoteSDP(seeder.localSDP);
+    await setRemoteSDP(seeder.sdp);
     const {localSDP} = useWebRTCStore.getState();
     let resp = await api.requestCreate(seeder.id, "SETANSSDP" , localSDP )
     Waiting.setState({waiting : true})
@@ -46,4 +46,4 @@ async function WaitDownload(pebble) {
 
 }
 
-module.exports = {AppendNewImage}
+module.exports = {AppendNewImage , BegSeeder}

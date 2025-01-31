@@ -3,7 +3,7 @@ import * as api from './api';
 import * as MediaLibrary from 'expo-media-library';
 import {useDispatcherLastChecked} from "./stores"
 import * as actions from "./actions"
-import {pebbleStore , stagedPebbles,useWebRTCStore, Waiting} from "./stores"
+import {pebbleStore , sessionStore,stagedPebbles,useWebRTCStore, Waiting} from "./stores"
 
 //have a background taskas well as set itnerval
 export default function PebbleDispatcher({album , interval}) {
@@ -48,7 +48,7 @@ export default function PebbleDispatcher({album , interval}) {
                     if (!pebStoreVal[pebs[i].id] && !alreadyDispatched.includes(pebs[i].id)) {
                         console.log("FINDING SEEDER FOR", pebs[i].id)
                         let seeder = await api.pebbleFindSeed(pebs[i].id)
-                        if(seeder.Found == false) {
+                        if(seeder.found == false) {
                             console.log("NO SEEDER FOUND FOR", pebs[i].id)
                             continue
                         }
@@ -97,9 +97,10 @@ export default function PebbleDispatcher({album , interval}) {
         async function startup() {
 
             try{
-                await api.login("67926aa4e5fe7e9979ff270f", "123")
+                //await api.login("6797bb2bdd1ec3f885a9de6d", "123")
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                await api.createSession("123")
+                await sessionStore.setState({sesID: "679c059269d549b92faa43ff"})
+                //await api.joinSession("679c059269d549b92faa43ff" , "123")
             }
             catch(e) {
                 console.log(e)

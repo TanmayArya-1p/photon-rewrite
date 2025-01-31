@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { RTCPeerConnection, RTCSessionDescription } from 'react-native-webrtc';
 
 const configuration = {
     iceServers: [
@@ -86,6 +87,7 @@ const useWebRTCStore = create((set) => ({
       };
       const offer = await peerConnection.createOffer()
       await peerConnection.setLocalDescription(offer);
+      console.log("LOCALSDP", peerConnection.localDescription.sdp);
       set({ peerConnection, localSDP: peerConnection.localDescription.sdp });
     },
   }));
