@@ -61,8 +61,7 @@ async function WaitDownload(pebble) {
             const tempFilePath = FileSystem.documentDirectory + 'tempFile';
             
             await FileSystem.writeAsStringAsync(tempFilePath, blob);
-            receivedBuffers = []; // Clear the buffer
-
+            receivedBuffers = []; 
             pebbleStore.setState({ 
               pebbles: { 
                 ...pebbleStore.getState().pebbles, 
@@ -84,6 +83,7 @@ async function WaitDownload(pebble) {
 
       receiveChannel.onclose = () => {
         console.log("Receive channel closed");
+        useWebRTCStore.getState().resetWebRTCClient();
       };
     };
   });

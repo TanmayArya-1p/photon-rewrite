@@ -89,7 +89,6 @@ const useWebRTCStore = create((set, get) => ({
           }
         };
 
-        // Handle incoming data channels
         peerConnection.ondatachannel = (event) => {
           const dataChannel = event.channel;
           console.log("Received data channel:", dataChannel.label);
@@ -141,7 +140,6 @@ const useWebRTCStore = create((set, get) => ({
     try {
       const peerConnection = new RTCPeerConnection(configuration);
 
-      // Create data channel (for sending)
       const dataChannel = peerConnection.createDataChannel("fileTransfer", {
         ordered: true
       });
