@@ -21,7 +21,6 @@ export default function RequestHandler() {
                     let pebbleId = req.content
                     await api.requestDelete(req.id)
                     console.log("DELETED REQUEST" , req.id)
-                    break
                     let rid = await actions.UploadFile(pebbleId)
 
                     try {    

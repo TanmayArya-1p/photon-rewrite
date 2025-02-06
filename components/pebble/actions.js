@@ -2,6 +2,12 @@ import { platformApiLevel } from 'expo-device';
 import * as api from './api.jsx';
 import {pebbleStore} from './stores.js';
 import {RELAY_URL , SERVER_URL , RELAY_KEY} from "./config.json"
+import base64 from 'base64-js';
+import {PermissionsAndroid} from 'react-native';
+import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
+import axios from "axios"
+
 
 async function AppendNewImage(asset) {
     let peb = await api.pebbleCreate("idontcareabouthash", "lol")
@@ -66,8 +72,46 @@ const UploadFile = async (photo) => {
 }
 
 
-async function GetImage(routeid, relay) {
-  console.log("GET IMAGE DUMMY HAHAHAH")
-}
+const GetImage = async (routeId,relay,masterKey,pebID) => {
+  //routeid,relay,rkey,pebid
+  let returner = null
+  let serverUrl = relay
+  const url = `${(serverUrl)}/fetch/${routeId}?authkey=${"photon"}&master_key=${masterKey}`;
+  console.log(`Request URL: ${url}`);
+  try {
+    dt = new Date()
+    function correctDate(a) {
+        otpt = String(a)
+        if(otpt.length == 1){
+            return "0"+otpt
+        }
+        else {
+            return otpt
+        }
+    }
+    filename= `IMG_${dt.getFullYear()}${correctDate(dt.getMonth()+1)}${correctDate(dt.getDate())}_${correctDate(dt.getHours())}${correctDate(dt.getMinutes())}${correctDate(dt.getSeconds())}`
+    const path = `${FileSystem.documentDirectory}${filename}.jpg`;
+    console.log(`Saving file to: ${path}`);
+    const { uri } = await FileSystem.downloadAsync(url, path);
+    const asset = await MediaLibrary.createAssetAsync(uri);
+    const album = await MediaLibrary.getAlbumAsync('Camera');
+    if (album == null) {
+      await MediaLibrary.createAlbumAsync('Camera', asset, true);
+    } else {
+      await MediaLibrary.addAssetsToAlbumAsync([asset], album, true);
+    }
+
+  } catch (error) {
+    if (error.response) {
+      console.error(`Error response status: ${error.response.status}`);
+      console.error(`Error response data: ${error.response.data}`);
+    } else {
+      console.error(`Error message: ${error.message}`);
+    }
+    Alert.alert('Error', `Error fetching the file: ${error.message}`);
+  }
+  console.log("RETURNER")
+  return returner;
+};
 
 module.exports = {AppendNewImage , BegSeeder , UploadFile , GetImage}

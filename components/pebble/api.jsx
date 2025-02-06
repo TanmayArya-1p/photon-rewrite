@@ -156,18 +156,16 @@ async function sessionMetadata() {
     let uid = userStore.getState().uid;
     let secret = userStore.getState().secret;
 
-    let data = new FormData();    
+ 
     let config = {
-      method: 'get',
+      method: 'put',
       maxBodyLength: Infinity,
       url: SERVER_URL+'/session?sid=' + sid,
       headers: { 
         'uid': uid, 
         'secret': secret, 
         'Content-Type': 'multipart/form-data'
-    },
-      data : data
-    };
+    }    };
     let resp = null    
     try {
         resp = await axios.request(config)
