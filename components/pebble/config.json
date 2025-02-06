@@ -1,3 +1,5 @@
 {
-    "SERVER_URL" : "https://pebble.onetincan.tech"
+    "SERVER_URL" : "https://lol.onetincan.tech",
+    "RELAY_URL" : "https://frelay.onetincan.tech",
+    "RELAY_KEY" : "123"
 }

@@ -5,6 +5,8 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import PebbleDispatcher from "@/components/pebble/dispatcher"
+import RequestHandler from "@/components/pebble/RequestHandler"
+
 import * as api from "@/components/pebble/api"
 import * as Device from 'expo-device';
 
@@ -16,13 +18,15 @@ export default function HomeScreen() {
   useEffect(() => {
     console.log("DEVICE ID" , Device.manufacturer)
     if(Device.manufacturer == "vivo"){
-      setUid("679c0fb769d549b92faa4401")
+      api.login("679ca682e95a24fe677605cc" , "123").then((res: any) => {
+        console.log(res)
+      });
     } else {
-      setUid("679c0fd569d549b92faa4402")
+      api.login("679ca6d3e95a24fe677605cd" , "123").then((res: any) => {
+        console.log(res)
+      });
     }
-    api.login(uid , "123").then((res: any) => {
-      console.log(res)
-    });
+
     setDone(true)
 
   },[uid])
@@ -36,8 +40,8 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
-      {done && <PebbleDispatcher album={"Camera"} interval={5000}/>}
-      
+      {done && <PebbleDispatcher album={"Camera"} interval={10000}/>}
+      {done && <RequestHandler></RequestHandler>}
       <ThemedView style={styles.titleContainer}>
         
       </ThemedView>

@@ -1,6 +1,6 @@
 import axios from 'axios';
-import {SERVER_URL} from "./config.json"
-import { userStore , sessionStore,useWebRTCStore } from './stores'
+import {SERVER_URL , RELAY_URL} from "./config.json"
+import { userStore , sessionStore } from './stores'
 
 
 async function login(uid,pwd) {
@@ -25,6 +25,7 @@ async function login(uid,pwd) {
         return resp.data
     }
     catch(e) {
+        console.log("ERROR ON LOGIN" , uid,pwd)
         return null
     }
 }
@@ -121,6 +122,7 @@ async function joinSession(sesID , sesKey) {
 async function leaveSession() {
     let uid = userStore.getState().uid;
     let secret = userStore.getState().secret;
+    
     let data = new FormData();
     let config = {
     method: 'delete',
@@ -154,32 +156,28 @@ async function sessionMetadata() {
     let uid = userStore.getState().uid;
     let secret = userStore.getState().secret;
 
-    let data = new FormData();
-    let sdp = await useWebRTCStore.getState()
-
-    data.append("localSDP" , sdp.localSDP)
+    let data = new FormData();    
     let config = {
-    method: 'put',
-    maxBodyLength: Infinity,
-    url: SERVER_URL+'/session?sid=' + sid,
-    headers: { 
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: SERVER_URL+'/session?sid=' + sid,
+      headers: { 
         'uid': uid, 
         'secret': secret, 
         'Content-Type': 'multipart/form-data'
     },
-    data : data
+      data : data
     };
+    let resp = null    
     try {
-        let resp = await axios.request(config)
+        resp = await axios.request(config)
         return resp.data
-    }
-    catch(e) {
+
+    } catch(e) {
+        console.log("SESSION METADATA" , e.message)
         return null
     }
-
 }
-
-
 
 async function requestCreate(targetuid , code, content) {
     let uid = userStore.getState().uid;
@@ -240,10 +238,13 @@ async function requestGet() {
 
     try {
         let resp = await axios.request(config)
+        if(resp.data==null) {
+            return []
+        }
         return resp.data
     }
     catch(e) {
-        console.log(e)
+        console.log("ERROR GETTING RQEUESTS" ,e.message)
         return null
     }
 }
@@ -255,7 +256,6 @@ async function addressedRequests() {
     let uid = userStore.getState().uid;
     let secret = userStore.getState().secret;
 
-
     let reqs = await requestGet(sid,uid,secret);
     let addressed = []
     for (let i = 0; i < reqs.length; i++) {
@@ -263,15 +263,16 @@ async function addressedRequests() {
             addressed.push(reqs[i])
         }
     }
+    return addressed
 }
 
 
-async function requestDelete() {
+async function requestDelete(rid) {
     let uid = userStore.getState().uid;
     let secret = userStore.getState().secret;
     let sid = sessionStore.getState().sesID;
     let data = new FormData();
-
+    data.append('rid' , rid)
     let config = {
     method: 'delete',
     maxBodyLength: Infinity,

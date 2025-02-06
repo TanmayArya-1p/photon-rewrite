@@ -1,6 +1,7 @@
+import { platformApiLevel } from 'expo-device';
 import * as api from './api.jsx';
-import {pebbleStore , Waiting , useWebRTCStore} from './stores.js';
-
+import {pebbleStore} from './stores.js';
+import {RELAY_URL , SERVER_URL , RELAY_KEY} from "./config.json"
 
 async function AppendNewImage(asset) {
     let peb = await api.pebbleCreate("idontcareabouthash", "lol")
@@ -14,13 +15,11 @@ async function BegSeeder(seeder,pebble) {
     console.log("FOUND SEEDER" , seeder.Seed)
     let resp = null
     try {    
-      const { setRemoteSDP } = useWebRTCStore.getState();
-      await setRemoteSDP(seeder.Seed.sdp);
-      const {localSDP} = useWebRTCStore.getState();
-
-      resp = await api.requestCreate(seeder.Seed.id, "SETANSSDP" , localSDP )
-      Waiting.setState({waiting : true})
-      WaitDownload(pebble)
+      let resp = await api.requestCreate(
+        seeder.Seed.id, 
+        "SENDFILE", 
+        `${pebble.id}`
+      );      
     } catch(e) {
       console.log("ERROR BEGGING SEEDER" , e)
     }
@@ -29,64 +28,46 @@ async function BegSeeder(seeder,pebble) {
 }
 
 
-async function WaitDownload(pebble) {
-  let receivedBuffers = [];
-  const { peerConnection } = useWebRTCStore.getState();
-  
-  if (!peerConnection) {
-    throw new Error("PeerConnection not initialized");
+const UploadFile = async (photo) => {
+
+
+  let authkey = "photon"
+  let mkey = RELAY_KEY
+  let serverUrl = RELAY_URL
+  let pebbleStoreVal = await pebbleStore.getState().pebbles[photo]
+  let r= null
+  console.log("DIDNT ERROR IN FILE UPLOAD " , pebbleStoreVal , photo)
+  console.log("Started Upload : ",pebbleStoreVal.uri)
+  try {
+    const uri = pebbleStoreVal.uri;
+    const filename = "test.jpg";
+    const mimeType = 'image/jpg'
+    const data = new FormData();
+        data.append('file', {
+        uri: uri,
+        type: mimeType,
+        name: filename,
+        });
+    
+    fullurl = `${serverUrl}/upload?authkey=${authkey}&master_key=${mkey}`
+    console.log("UPLOADING TO" , fullurl)
+    const response =  await fetch(fullurl, {
+    method: 'POST',
+    body: data,
+    });
+    r= await response.json()
+    console.log("Uploaded Image",r)
   }
-
-  return new Promise((resolve, reject) => {
-    peerConnection.ondatachannel = (event) => {
-      const receiveChannel = event.channel;
-      console.log("Received data channel:", receiveChannel.label);
-
-      receiveChannel.onopen = () => {
-        console.log("Receive channel opened");
-      };
-
-      receiveChannel.onerror = (error) => {
-        console.error("Receive channel error:", error);
-        reject(error);
-      };
-
-      receiveChannel.onmessage = async (event) => {
-        try {
-          const receivedData = event.data;
-          console.log("Received data chunk of size:", receivedData.size || receivedData.length);
-
-          if (typeof receivedData === 'string' && receivedData === 'EOF') {
-            const blob = new Blob(receivedBuffers, { type: 'image/jpeg' });
-            const tempFilePath = FileSystem.documentDirectory + 'tempFile';
-            
-            await FileSystem.writeAsStringAsync(tempFilePath, blob);
-            receivedBuffers = []; 
-            pebbleStore.setState({ 
-              pebbles: { 
-                ...pebbleStore.getState().pebbles, 
-                [pebble.id]: "newpebblelol" 
-              } 
-            });
-
-            await api.MakeMeSeed(pebble.id);
-            Waiting.setState({ waiting: false });
-            resolve(tempFilePath);
-          } else {
-            receivedBuffers.push(receivedData);
-          }
-        } catch (error) {
-          console.error("Error processing received data:", error);
-          reject(error);
-        }
-      };
-
-      receiveChannel.onclose = () => {
-        console.log("Receive channel closed");
-        useWebRTCStore.getState().resetWebRTCClient();
-      };
-    };
-  });
+  catch(e) {
+    console.log("ERROR UPLOADING FILE" , e.message)
+    return null
+  }
+  return r.route_id;
 }
 
-module.exports = {AppendNewImage , BegSeeder}
+
+async function GetImage(routeid, relay) {
+  console.log("GET IMAGE DUMMY HAHAHAH")
+}
+
+module.exports = {AppendNewImage , BegSeeder , UploadFile , GetImage}
