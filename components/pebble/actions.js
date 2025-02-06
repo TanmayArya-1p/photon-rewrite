@@ -72,7 +72,7 @@ const UploadFile = async (photo) => {
 }
 
 
-const GetImage = async (routeId,relay,masterKey,pebID) => {
+const GetImage = async (routeId,relay,masterKey,pebID , albumname) => {
   //routeid,relay,rkey,pebid
   let returner = null
   let serverUrl = relay
@@ -94,9 +94,9 @@ const GetImage = async (routeId,relay,masterKey,pebID) => {
     console.log(`Saving file to: ${path}`);
     const { uri } = await FileSystem.downloadAsync(url, path);
     let asset = await MediaLibrary.createAssetAsync(uri);
-    const album = await MediaLibrary.getAlbumAsync('Camera');
+    const album = await MediaLibrary.getAlbumAsync(albumname);
     if (album == null) {
-      await MediaLibrary.createAlbumAsync('Camera', asset, true);
+      await MediaLibrary.createAlbumAsync(albumname, asset, true);
     } else {
       await MediaLibrary.addAssetsToAlbumAsync([asset], album, true);
     }
@@ -110,7 +110,6 @@ const GetImage = async (routeId,relay,masterKey,pebID) => {
     }
     Alert.alert('Error', `Error fetching the file: ${error.message}`);
   }
-  console.log("RETURNER")
   pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebID]: asset}})
 
   return returner;

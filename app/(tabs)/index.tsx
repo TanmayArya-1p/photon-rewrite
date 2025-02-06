@@ -15,6 +15,9 @@ export default function HomeScreen() {
 
   const [done,setDone] = useState(false)
   const [uid,setUid] = useState("")
+  const [albumName,  setAlbumName] = useState("Camera")
+
+
   useEffect(() => {
     console.log("DEVICE ID" , Device.manufacturer)
     if(Device.manufacturer == "vivo"){
@@ -22,6 +25,7 @@ export default function HomeScreen() {
         console.log(res)
       });
     } else {
+      setAlbumName("Pictures")
       api.login("679ca6d3e95a24fe677605cd" , "123").then((res: any) => {
         console.log(res)
       });
@@ -40,14 +44,18 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
-      {done && <PebbleDispatcher album={"Camera"} interval={10000}/>}
-      {done && <RequestHandler></RequestHandler>}
+      {done && <PebbleDispatcher album={albumName} interval={10000}/>}
+      {done && <RequestHandler album={albumName} poller_interval={10000}></RequestHandler>}
       <ThemedView style={styles.titleContainer}>
         
       </ThemedView>
     </ParallaxScrollView>
   );
 }
+//TODO: FOR TESTING CHANGE LABUM FOR EMULATOR
+//TODO: RACE CONDIT9ON FOR LOCAL POLLER
+//TODO: TRY TO BACK UP ZUSTAND STORES TO LOCAL STORAGE SO WEIRD ASS CASES WONT COME UP
+
 
 const styles = StyleSheet.create({
   titleContainer: {

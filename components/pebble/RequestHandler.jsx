@@ -5,7 +5,7 @@ import {RELAY_URL , SERVER_URL , RELAY_KEY} from "./config.json"
 import {pebbleStore , stagedPebbles} from "./stores"
 
 
-export default function RequestHandler() {
+export default function RequestHandler({poller_interval , album}) {
 
 
 
@@ -43,7 +43,7 @@ export default function RequestHandler() {
                     let updatedSps = sps.filter(item => item !== pebid);
                     stagedPebbles.setState({ stagedPebbles: updatedSps });
                     await api.requestDelete(req.id)
-                    actions.GetImage(routeid,relay,rkey,pebid)
+                    actions.GetImage(routeid,relay,rkey,pebid , album)
                     break
                 default:
                     break
@@ -56,7 +56,7 @@ export default function RequestHandler() {
         Poller()
         const interval = setInterval(() => {
             Poller()
-        }, 10000);
+        }, poller_interval);
         return () => clearInterval(interval);
     },[])
 

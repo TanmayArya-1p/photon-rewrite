@@ -54,12 +54,12 @@ export default function PebbleDispatcher({album , interval}) {
             console.log("ERROR POLLING SERVER" , e)
         }
 
-        console.log("HERE")
         //CHECKING NEW IMAGES LOCALLY PART
         setLastChecked(async (prevLastChecked) => {
             let lc = await prevLastChecked;
             let albtemp = {}
             try {
+                //MediaLibrary.getAlbumsAsync().then((r) => console.log(r))
                 albtemp = await MediaLibrary.getAssetsAsync({first:10000 ,album: albumObj , createdAfter: lc , sortBy: "creationTime"}) 
                 albtemp = albtemp.assets
                 if(albtemp.length > 0) {
