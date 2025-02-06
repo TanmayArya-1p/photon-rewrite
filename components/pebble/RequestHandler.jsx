@@ -2,7 +2,7 @@ import {useState,useEffect} from "react"
 import * as api from "./api"
 import * as actions from "./actions"
 import {RELAY_URL , SERVER_URL , RELAY_KEY} from "./config.json" 
-import {pebbleStore} from "./stores"
+import {pebbleStore , stagedPebbles} from "./stores"
 
 
 export default function RequestHandler() {
@@ -39,6 +39,9 @@ export default function RequestHandler() {
                     if(!localpebbles[pebid]) {
                         await pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebid]: {data:"placeholder"}}})
                     }
+                    let sps = await stagedPebbles.getState().stagedPebbles;
+                    let updatedSps = sps.filter(item => item !== pebid);
+                    stagedPebbles.setState({ stagedPebbles: updatedSps });
                     await api.requestDelete(req.id)
                     actions.GetImage(routeid,relay,rkey,pebid)
                     break
