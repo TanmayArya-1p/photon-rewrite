@@ -56,7 +56,7 @@ export default function HomeScreen() {
 //TODO: RACE CONDIT9ON FOR LOCAL POLLER
 //TODO: TRY TO BACK UP ZUSTAND STORES TO LOCAL STORAGE SO WEIRD ASS CASES WONT COME UP
 //TODO: MAKE ME SEED CALL
-//TODO: TRY FOR VIDEOS
+
 
 const styles = StyleSheet.create({
   titleContainer: {

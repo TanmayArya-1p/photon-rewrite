@@ -112,7 +112,8 @@ const GetImage = async (routeId,relay,masterKey,pebID , albumname  ,fn) => {
     } else {
       await MediaLibrary.addAssetsToAlbumAsync([asset], album, true);
     }
-
+    console.log("Generated Asset" , asset)
+    pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebID]: asset}})
   } catch (error) {
     if (error.response) {
       console.error(`Error response status: ${error.response.status}`);
@@ -122,8 +123,7 @@ const GetImage = async (routeId,relay,masterKey,pebID , albumname  ,fn) => {
     }
     Alert.alert('Error', `Error fetching the file: ${error.message}`);
   }
-  pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebID]: asset}})
-  pebbleStore.getState().then(async (r) => console.log("PEBBLE STORE" , r.pebbles))
+
   return returner;
 };
 
