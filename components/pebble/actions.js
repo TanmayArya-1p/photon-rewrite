@@ -10,7 +10,7 @@ import axios from "axios"
 
 
 async function AppendNewImage(asset) {
-    let peb = await api.pebbleCreate("idontcareabouthash", "lol")
+    let peb = await api.pebbleCreate("idontcareabouthash", asset.filename.split(" ").pop())
     console.log("APPENDING NEW LOCAL PEBBLE",peb)
     pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [peb.id]: asset}})
     console.log("PEBBLE STORE" , pebbleStore.getState())
@@ -41,13 +41,24 @@ const UploadFile = async (photo) => {
   let mkey = RELAY_KEY
   let serverUrl = RELAY_URL
   let pebbleStoreVal = await pebbleStore.getState().pebbles[photo]
+  let isVideo = false;
+  if(pebbleStoreVal.mediaType != "photo") {
+    isVideo = true
+  }
   let r= null
-  console.log("DIDNT ERROR IN FILE UPLOAD " , pebbleStoreVal , photo)
   console.log("Started Upload : ",pebbleStoreVal.uri)
   try {
     const uri = pebbleStoreVal.uri;
-    const filename = "test.jpg";
-    const mimeType = 'image/jpg'
+    const filename = pebbleStoreVal.filename;
+    const extension = filename.split('.').pop().toLowerCase();
+    const mimeMap = {
+      'jpg': 'image/jpg',
+      'jpeg': 'image/jpg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'mp4': 'video/mp4'
+    };
+    const mimeType = mimeMap[extension];
     const data = new FormData();
         data.append('file', {
         uri: uri,
@@ -66,13 +77,13 @@ const UploadFile = async (photo) => {
   }
   catch(e) {
     console.log("ERROR UPLOADING FILE" , e.message)
-    return null
+    return [null,null]
   }
-  return r.route_id;
+  return [r.route_id,pebbleStoreVal.filename];
 }
 
 
-const GetImage = async (routeId,relay,masterKey,pebID , albumname) => {
+const GetImage = async (routeId,relay,masterKey,pebID , albumname  ,fn) => {
   //routeid,relay,rkey,pebid
   let returner = null
   let serverUrl = relay
@@ -89,8 +100,9 @@ const GetImage = async (routeId,relay,masterKey,pebID , albumname) => {
             return otpt
         }
     }
-    filename= `IMG_${dt.getFullYear()}${correctDate(dt.getMonth()+1)}${correctDate(dt.getDate())}_${correctDate(dt.getHours())}${correctDate(dt.getMinutes())}${correctDate(dt.getSeconds())}`
-    const path = `${FileSystem.documentDirectory}${filename}.jpg`;
+
+    let filename= fn
+    const path = `${FileSystem.documentDirectory}${filename}`;
     console.log(`Saving file to: ${path}`);
     const { uri } = await FileSystem.downloadAsync(url, path);
     let asset = await MediaLibrary.createAssetAsync(uri);
@@ -111,7 +123,7 @@ const GetImage = async (routeId,relay,masterKey,pebID , albumname) => {
     Alert.alert('Error', `Error fetching the file: ${error.message}`);
   }
   pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebID]: asset}})
-
+  pebbleStore.getState().then(async (r) => console.log("PEBBLE STORE" , r.pebbles))
   return returner;
 };
 

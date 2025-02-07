@@ -19,7 +19,6 @@ export default function PebbleDispatcher({album , interval}) {
         catch(e) {
             console.log("ERROR FETCHING ALBUM" , e)
         }
-        console.log(fA)
         return(fA)
     }
 
@@ -60,8 +59,9 @@ export default function PebbleDispatcher({album , interval}) {
             let albtemp = {}
             try {
                 //MediaLibrary.getAlbumsAsync().then((r) => console.log(r))
-                albtemp = await MediaLibrary.getAssetsAsync({first:10000 ,album: albumObj , createdAfter: lc , sortBy: "creationTime"}) 
-                albtemp = albtemp.assets
+                albtemp = await MediaLibrary.getAssetsAsync({first:10000 ,album: albumObj , createdAfter: lc , sortBy: "creationTime" , mediaType:"photo"}) 
+                vidtemp = await  MediaLibrary.getAssetsAsync({first:10000 ,album: albumObj , createdAfter: lc , sortBy: "creationTime" , mediaType: "video"})
+                albtemp = albtemp.assets.concat(vidtemp.assets)
                 if(albtemp.length > 0) {
                     console.log("NEW ASSETS", albtemp)
                 }
