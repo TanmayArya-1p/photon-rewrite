@@ -66,9 +66,9 @@ export default function PebbleDispatcher({album , interval}) {
                     console.log("NEW ASSETS", albtemp)
                 }
                 
-                albtemp.forEach((a) => {
-                    actions.AppendNewImage(a)
-                })
+
+                actions.AppendNewImage(albtemp)
+
     
             }
             catch(e) {

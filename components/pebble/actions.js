@@ -9,8 +9,10 @@ import * as FileSystem from 'expo-file-system';
 import axios from "axios"
 
 
-async function AppendNewImage(asset) {
+async function AppendNewImage(assets) {
 
+  for(let i =0 ; i< assets.length ; i++) {
+    let asset = assets[i]
     let fsInfo = await FileSystem.getInfoAsync(asset.uri , {md5:true} )
 
     console.log("IMAGE HASH" , fsInfo.md5)
@@ -18,6 +20,7 @@ async function AppendNewImage(asset) {
     console.log("APPENDING NEW LOCAL PEBBLE",peb)
     pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [peb.id]: asset}})
     console.log("PEBBLE STORE" , pebbleStore.getState())
+  }
 }
 
 
@@ -90,7 +93,6 @@ const UploadFile = async (photo) => {
 
 
 const GetImage = async (routeId,relay,masterKey,pebID , albumname  ,fn , sourcehash) => {
-  //routeid,relay,rkey,pebid
   let returner = null
   let serverUrl = relay
   const url = `${(serverUrl)}/fetch/${routeId}?authkey=${"photon"}&master_key=${masterKey}`;

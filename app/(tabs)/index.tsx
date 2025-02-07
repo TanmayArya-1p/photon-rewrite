@@ -52,10 +52,7 @@ export default function HomeScreen() {
     </ParallaxScrollView>
   );
 }
-//TODO: FOR TESTING CHANGE LABUM FOR EMULATOR
-//TODO: RACE CONDIT9ON FOR LOCAL POLLER
 //TODO: TRY TO BACK UP ZUSTAND STORES TO LOCAL STORAGE SO WEIRD ASS CASES WONT COME UP
-//TODO: MAKE ME SEED CALL
 
 
 const styles = StyleSheet.create({
