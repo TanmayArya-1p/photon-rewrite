@@ -21,7 +21,7 @@ export default function RequestHandler({poller_interval , album}) {
                     let pebbleId = req.content
                     await api.requestDelete(req.id)
                     console.log("DELETED REQUEST" , req.id)
-                    let [rid,fn] = await actions.UploadFile(pebbleId)
+                    let [rid,fn,shash] = await actions.UploadFile(pebbleId)
                     console.log("ROUTE ID" , rid)
                     console.log("TRANSMITTED FILENAME" , fn)
 
@@ -29,14 +29,14 @@ export default function RequestHandler({poller_interval , album}) {
                         let resp = await api.requestCreate(
                         req.from, 
                         "GETFILE", 
-                        `${rid}|${RELAY_URL}|${RELAY_KEY}|${pebbleId}|${fn}`
+                        `${rid}|${RELAY_URL}|${RELAY_KEY}|${pebbleId}|${fn}|${shash}`
                         );      
                     } catch(e) {
                         console.log("ERROR CREATING GETFILE REQUEST" , e)
                     }
                     break
                 case "GETFILE":
-                    let [routeid, relay , rkey ,pebid , getfilename] = req.content.split("|")
+                    let [routeid, relay , rkey ,pebid , getfilename,sourcehash] = req.content.split("|")
                     let localpebbles = await pebbleStore.getState().pebbles
                     if(!localpebbles[pebid]) {
                         await pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebid]: {data:"placeholder"}}})
@@ -45,7 +45,7 @@ export default function RequestHandler({poller_interval , album}) {
                     let updatedSps = sps.filter(item => item !== pebid);
                     stagedPebbles.setState({ stagedPebbles: updatedSps });
                     await api.requestDelete(req.id)
-                    actions.GetImage(routeid,relay,rkey,pebid , album , getfilename)
+                    actions.GetImage(routeid,relay,rkey,pebid , album , getfilename , sourcehash)
                     break
                 default:
                     break

@@ -51,6 +51,8 @@ const UploadFile = async (photo) => {
   }
   let r= null
   console.log("Started Upload : ",pebbleStoreVal.uri)
+  let assethash = await FileSystem.getInfoAsync(pebbleStoreVal.uri , {md5:true})
+  assethash = assethash.md5
   try {
     const uri = pebbleStoreVal.uri;
     const filename = pebbleStoreVal.filename;
@@ -81,13 +83,13 @@ const UploadFile = async (photo) => {
   }
   catch(e) {
     console.log("ERROR UPLOADING FILE" , e.message)
-    return [null,null]
+    return [null,null,null]
   }
-  return [r.route_id,pebbleStoreVal.filename];
+  return [r.route_id,pebbleStoreVal.filename,assethash];
 }
 
 
-const GetImage = async (routeId,relay,masterKey,pebID , albumname  ,fn) => {
+const GetImage = async (routeId,relay,masterKey,pebID , albumname  ,fn , sourcehash) => {
   //routeid,relay,rkey,pebid
   let returner = null
   let serverUrl = relay
@@ -116,7 +118,17 @@ const GetImage = async (routeId,relay,masterKey,pebID , albumname  ,fn) => {
     } else {
       await MediaLibrary.addAssetsToAlbumAsync([asset], album, true);
     }
-    console.log("Generated Asset" , asset)
+
+    let genfs =   await FileSystem.getInfoAsync(asset.uri , {md5:true})
+    console.log("Generated Asset Hash" , genfs.md5)
+    if(genfs.md5 != sourcehash) {
+        console.log("HASH MISMATCH WITH SOURCE ❌" , genfs.md5, "=\\=", sourcehash)
+        return null
+    }
+    else{
+        console.log("HASH VERIFIED WITH SOURCE ✅" , genfs.md5, "==", sourcehash)
+    }
+
     pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebID]: asset}})
     await api.MakeMeSeed(pebID)
   } catch (error) {
