@@ -329,7 +329,7 @@ async function pebbleCreate(hash,info) {
 
 
 async function MakeMeSeed(pid) {
-    
+    console.log("MAKING LOCAL USER SEED FOR" , pid)
     let sid = sessionStore.getState().sesID;
     let uid = userStore.getState().uid;
     let secret = userStore.getState().secret;
@@ -351,6 +351,7 @@ async function MakeMeSeed(pid) {
     };
     try {
         let resp = await axios.request(config)
+        console.log("SUCCESSFULLY MADE A SEED FOR" , pid)
         return resp.data
     }
     catch(e) {
@@ -424,4 +425,4 @@ async function pebbleFindSeed(pid) {
 }
 
 
-module.exports = {login,requestCreate,requestDelete,register,createSession,joinSession,leaveSession,sessionMetadata,requestGet,addressedRequests,pebbleCreate,pebbleGet,pebbleFindSeed}
+module.exports = {login,requestCreate,requestDelete,register,createSession,joinSession,leaveSession,sessionMetadata,requestGet,addressedRequests,pebbleCreate,pebbleGet,pebbleFindSeed  ,MakeMeSeed}

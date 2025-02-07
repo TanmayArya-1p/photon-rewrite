@@ -20,22 +20,6 @@ async function AppendNewImage(asset) {
     console.log("PEBBLE STORE" , pebbleStore.getState())
 }
 
-async function MakeSeeder(pebble) {
-    console.log("FOUND SEEDER" , seeder.Seed)
-    let resp = null
-    try {    
-      let resp = await api.requestCreate(
-        seeder.Seed.id, 
-        "SENDFILE", 
-        `${pebble.id}`
-      );      
-    } catch(e) {
-      console.log("ERROR BEGGING SEEDER" , e)
-    }
-
-    return resp
-}
-
 
 async function BegSeeder(seeder,pebble) {
     console.log("FOUND SEEDER" , seeder.Seed)
@@ -134,6 +118,7 @@ const GetImage = async (routeId,relay,masterKey,pebID , albumname  ,fn) => {
     }
     console.log("Generated Asset" , asset)
     pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebID]: asset}})
+    await api.MakeMeSeed(pebID)
   } catch (error) {
     if (error.response) {
       console.error(`Error response status: ${error.response.status}`);
