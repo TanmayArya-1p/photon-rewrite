@@ -10,10 +10,30 @@ import axios from "axios"
 
 
 async function AppendNewImage(asset) {
-    let peb = await api.pebbleCreate("idontcareabouthash", asset.filename.split(" ").pop())
+
+    let fsInfo = await FileSystem.getInfoAsync(asset.uri , {md5:true} )
+
+    console.log("IMAGE HASH" , fsInfo.md5)
+    let peb = await api.pebbleCreate(fsInfo.md5, asset.filename.split(" ").pop())
     console.log("APPENDING NEW LOCAL PEBBLE",peb)
     pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [peb.id]: asset}})
     console.log("PEBBLE STORE" , pebbleStore.getState())
+}
+
+async function MakeSeeder(pebble) {
+    console.log("FOUND SEEDER" , seeder.Seed)
+    let resp = null
+    try {    
+      let resp = await api.requestCreate(
+        seeder.Seed.id, 
+        "SENDFILE", 
+        `${pebble.id}`
+      );      
+    } catch(e) {
+      console.log("ERROR BEGGING SEEDER" , e)
+    }
+
+    return resp
 }
 
 
