@@ -1,15 +1,17 @@
 import { platformApiLevel } from 'expo-device';
 import * as api from './api.jsx';
-import {pebbleStore} from './stores.js';
+import {pebbleStore , EllipticCurve} from './stores.js';
 import {RELAY_URL , SERVER_URL , RELAY_KEY} from "./config.json"
 import base64 from 'base64-js';
 import {PermissionsAndroid} from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import axios from "axios"
+import * as crypto from "./crypto.js"
+
+
 
 async function AppendNewImage(assets) {
-
   for(let i =0 ; i< assets.length ; i++) {
     let asset = assets[i]
     let fsInfo = await FileSystem.getInfoAsync(asset.uri , {md5:true} )
@@ -27,10 +29,12 @@ async function BegSeeder(seeder,pebble) {
     console.log("FOUND SEEDER" , seeder.Seed)
     let resp = null
     try {    
+      let ec = await EllipticCurve.getState()
+      let pubec = await ec.keyPair.publicKey
       let resp = await api.requestCreate(
         seeder.Seed.id, 
         "SENDFILE", 
-        `${pebble.id}`
+        `${pebble.id}|${pubec}`
       );      
     } catch(e) {
       console.log("ERROR BEGGING SEEDER" , e)
@@ -40,108 +44,98 @@ async function BegSeeder(seeder,pebble) {
 }
 
 
-const UploadFile = async (photo) => {
-
-
+const UploadFile = async (photo,pubKeyOfOther) => {
+  let encryptionKey = null
+  try {
+    encryptionKey = await crypto.deriveSharedSecret(pubKeyOfOther)
+  }
+  catch(e) {
+    console.log(e.message)
+    return [null,null,null]
+  }
   let authkey = "photon"
   let mkey = RELAY_KEY
   let serverUrl = RELAY_URL
-  let pebbleStoreVal = await pebbleStore.getState().pebbles[photo]
-  let isVideo = false;
-  if(pebbleStoreVal.mediaType != "photo") {
-    isVideo = true
-  }
-  let r= null
-  console.log("Started Upload : ",pebbleStoreVal.uri)
-  let assethash = await FileSystem.getInfoAsync(pebbleStoreVal.uri , {md5:true})
-  assethash = assethash.md5
+  let pebbleStoreVal = pebbleStore.getState().pebbles[photo]
+
+  let isVideo = pebbleStoreVal.mediaType !== "photo";
+
+  console.log("Started Upload : ", pebbleStoreVal.uri);
+
+  let assethash = (await FileSystem.getInfoAsync(pebbleStoreVal.uri, { md5: true })).md5;
+
   try {
-    const uri = pebbleStoreVal.uri;
+
+    const encryptedUri = await crypto.encryptFileContents(pebbleStoreVal.uri, encryptionKey);
+
     const filename = pebbleStoreVal.filename;
-    const extension = filename.split('.').pop().toLowerCase();
-    const mimeMap = {
-      'jpg': 'image/jpg',
-      'jpeg': 'image/jpg',
-      'png': 'image/png',
-      'gif': 'image/gif',
-      'mp4': 'video/mp4'
-    };
-    const mimeType = mimeMap[extension];
     const data = new FormData();
-        data.append('file', {
-        uri: uri,
-        type: mimeType,
-        name: filename,
-        });
-    
-    fullurl = `${serverUrl}/upload?authkey=${authkey}&master_key=${mkey}`
-    console.log("UPLOADING TO" , fullurl)
-    const response =  await fetch(fullurl, {
-    method: 'POST',
-    body: data,
+    data.append('file', {
+      uri: encryptedUri,
+      type: 'application/octet-stream',
+      name: filename
     });
-    r= await response.json()
-    console.log("Uploaded Image",r)
+
+    const fullurl = `${serverUrl}/upload?authkey=${authkey}&master_key=${mkey}`;
+    console.log("UPLOADING TO", fullurl);
+    const response = await fetch(fullurl, {
+      method: 'POST',
+      body: data,
+    });
+    const r = await response.json();
+    console.log("Uploaded Encrypted File", r);
+    return [r.route_id, pebbleStoreVal.filename, assethash];
+  } catch (e) {
+    console.error("ERROR UPLOADING FILE", e.message);
+    return [null, null, null];
   }
-  catch(e) {
-    console.log("ERROR UPLOADING FILE" , e.message)
-    return [null,null,null]
-  }
-  return [r.route_id,pebbleStoreVal.filename,assethash];
-}
+};
 
 
-const GetImage = async (routeId,relay,masterKey,pebID , albumname  ,fn , sourcehash) => {
-  let returner = null
-  let serverUrl = relay
-  const url = `${(serverUrl)}/fetch/${routeId}?authkey=${"photon"}&master_key=${masterKey}`;
+const GetImage = async (routeId, relay, masterKey, pebID, albumname, fn, sourcehash,otherPrivKey) => {
+  let returner = null;
+  let serverUrl = relay;
+  const url = `${serverUrl}/fetch/${routeId}?authkey=photon&master_key=${masterKey}`;
   console.log(`Request URL: ${url}`);
   try {
-    dt = new Date()
-    function correctDate(a) {
-        otpt = String(a)
-        if(otpt.length == 1){
-            return "0"+otpt
-        }
-        else {
-            return otpt
-        }
-    }
+    const encryptedPath = FileSystem.cacheDirectory + 'downloadedEncrypted.tmp';
+    console.log(`Downloading encrypted file to: ${encryptedPath}`);
+    await FileSystem.downloadAsync(url, encryptedPath);
+    const filename = fn;
+    const decryptedPath = `${FileSystem.documentDirectory}${filename}`;
+    console.log(`Decrypting file to: ${decryptedPath}`);
 
-    let filename= fn
-    const path = `${FileSystem.documentDirectory}${filename}`;
-    console.log(`Saving file to: ${path}`);
-    const { uri } = await FileSystem.downloadAsync(url, path);
-    let asset = await MediaLibrary.createAssetAsync(uri);
+    const decryptionKey = await crypto.deriveSharedSecret(otherPrivKey);
+    
+    await crypto.decryptFileContents(encryptedPath, decryptionKey, decryptedPath);
+    let asset = await MediaLibrary.createAssetAsync(decryptedPath);
     const album = await MediaLibrary.getAlbumAsync(albumname);
     if (album == null) {
-      await MediaLibrary.createAlbumAsync(albumname, asset, true);
+        await MediaLibrary.createAlbumAsync(albumname, asset, true);
     } else {
-      await MediaLibrary.addAssetsToAlbumAsync([asset], album, true);
+        await MediaLibrary.addAssetsToAlbumAsync([asset], album, true);
+    }
+    
+    let genfs = await FileSystem.getInfoAsync(asset.uri, { md5: true });
+    console.log("Generated Asset Hash", genfs.md5);
+    if (genfs.md5 !== sourcehash) {
+        console.log("HASH MISMATCH WITH SOURCE ❌");
+        return null;
+    } else {
+        console.log("HASH VERIFIED WITH SOURCE ✅");
     }
 
-    let genfs =   await FileSystem.getInfoAsync(asset.uri , {md5:true})
-    console.log("Generated Asset Hash" , genfs.md5)
-    if(genfs.md5 != sourcehash) {
-        console.log("HASH MISMATCH WITH SOURCE ❌" )
-        return null
-    }
-    else{
-        console.log("HASH VERIFIED WITH SOURCE ✅" )
-    }
-
-    pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebID]: asset}})
-    await api.MakeMeSeed(pebID)
+    pebbleStore.setState({ pebbles: { ...pebbleStore.getState().pebbles, [pebID]: asset } });
+    await api.MakeMeSeed(pebID);
   } catch (error) {
-    if (error.response) {
-      console.error(`Error response status: ${error.response.status}`);
-      console.error(`Error response data: ${error.response.data}`);
-    } else {
-      console.error(`Error message: ${error.message}`);
-    }
-    Alert.alert('Error', `Error fetching the file: ${error.message}`);
+      if (error.response) {
+          console.error(`Error response status: ${error.response.status}`);
+          console.error(`Error response data: ${error.response.data}`);
+      } else {
+          console.error(`Error message: ${error.message}`);
+      }
+      Alert.alert('Error', `Error fetching the file: ${error.message}`);
   }
-
   return returner;
 };
 

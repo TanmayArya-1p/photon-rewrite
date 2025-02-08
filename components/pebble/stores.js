@@ -1,10 +1,10 @@
 import { create } from 'zustand'
+import { ec as EC } from 'elliptic';
+import * as ExpoCrypto from 'expo-crypto';
 
-const configuration = {
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-    ],
-};
+function bytesToHex(bytes) {
+    return Array.from(bytes).map((a) => a.toString(16).padStart(2, '0')).join('');
+}
 
 const userStore = create((set) => ({
     uid: "",
@@ -55,10 +55,22 @@ const stagedPebbles = create((set) => ({
     setStagedPebbles: (stagedPebbles) => set({ stagedPebbles }),
 }))
 
-const stagedRequest = create((set) => ({
-    stagedRequests : [],
-    setStagedRequests: (stagedRequests) => set({ stagedRequests }),
-}))
+const EllipticCurve = create((set , get) => {
+    return {
+        curve: new EC('secp256k1'),
+        keyPair: null,
+        setKeyPair: (keyPair) => set({ keyPair }),
+        generateKeyPair : async () => {
+            const randBytes = await ExpoCrypto.getRandomBytesAsync(32);
+            const privKeyHex = bytesToHex(randBytes);
+            const keyPair = get().curve.keyFromPrivate(privKeyHex);
+            const publicKeyHex = keyPair.getPublic().encode('hex');
+            let returner = { privateKey: privKeyHex, publicKey: publicKeyHex };
+            set({ keyPair : returner });
+            return returner;
+        }
+    }
+})
 
 
-module.exports = {useLocalSDP,stagedPebbles,useDispatcherLastChecked , userStore , sessionStore , concernedRequestsStore , pebbleStore }
+module.exports = {EllipticCurve,useLocalSDP,stagedPebbles,useDispatcherLastChecked , userStore , sessionStore , concernedRequestsStore , pebbleStore }

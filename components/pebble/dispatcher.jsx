@@ -3,7 +3,7 @@ import * as api from './api';
 import * as MediaLibrary from 'expo-media-library';
 import {useDispatcherLastChecked} from "./stores"
 import * as actions from "./actions"
-import {pebbleStore , sessionStore,stagedPebbles} from "./stores"
+import {pebbleStore , sessionStore,stagedPebbles , EllipticCurve} from "./stores"
 
 export default function PebbleDispatcher({album , interval}) {
     const [_, requestPermission] = MediaLibrary.usePermissions();
@@ -87,6 +87,8 @@ export default function PebbleDispatcher({album , interval}) {
         async function startup() {
 
             try{
+                let ec = await EllipticCurve.getState()
+                ec.generateKeyPair()
                 //await api.login("6797bb2bdd1ec3f885a9de6d", "123")
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 //await api.createSession("123")

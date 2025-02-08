@@ -2,7 +2,7 @@ import {useState,useEffect} from "react"
 import * as api from "./api"
 import * as actions from "./actions"
 import {RELAY_URL , SERVER_URL , RELAY_KEY} from "./config.json" 
-import {pebbleStore , stagedPebbles} from "./stores"
+import {pebbleStore , stagedPebbles , EllipticCurve} from "./stores"
 
 
 export default function RequestHandler({poller_interval , album}) {
@@ -18,25 +18,25 @@ export default function RequestHandler({poller_interval , album}) {
             let req = reqs[i]
             switch(req.code) {
                 case "SENDFILE":
-                    let pebbleId = req.content
+                    let [pebbleId,sfOtherPrivKey] = req.content.split("|")
                     await api.requestDelete(req.id)
                     console.log("DELETED REQUEST" , req.id)
-                    let [rid,fn,shash] = await actions.UploadFile(pebbleId)
+                    let [rid,fn,shash] = await actions.UploadFile(pebbleId , sfOtherPrivKey)
                     console.log("ROUTE ID" , rid)
                     console.log("TRANSMITTED FILENAME" , fn)
-
+                    let ec = await EllipticCurve.getState()
                     try {    
                         let resp = await api.requestCreate(
                         req.from, 
                         "GETFILE", 
-                        `${rid}|${RELAY_URL}|${RELAY_KEY}|${pebbleId}|${fn}|${shash}`
+                        `${rid}|${RELAY_URL}|${RELAY_KEY}|${pebbleId}|${fn}|${shash}|${ec.keyPair.publicKey}`
                         );      
                     } catch(e) {
                         console.log("ERROR CREATING GETFILE REQUEST" , e)
                     }
                     break
                 case "GETFILE":
-                    let [routeid, relay , rkey ,pebid , getfilename,sourcehash] = req.content.split("|")
+                    let [routeid, relay , rkey ,pebid , getfilename,sourcehash,otherPrivKey] = req.content.split("|")
                     let localpebbles = await pebbleStore.getState().pebbles
                     if(!localpebbles[pebid]) {
                         await pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebid]: {data:"placeholder"}}})
@@ -45,7 +45,7 @@ export default function RequestHandler({poller_interval , album}) {
                     let updatedSps = sps.filter(item => item !== pebid);
                     stagedPebbles.setState({ stagedPebbles: updatedSps });
                     await api.requestDelete(req.id)
-                    actions.GetImage(routeid,relay,rkey,pebid , album , getfilename , sourcehash)
+                    actions.GetImage(routeid,relay,rkey,pebid , album , getfilename , sourcehash , otherPrivKey)
                     break
                 default:
                     break
