@@ -53,7 +53,7 @@ export default function HomeScreen() {
   );
 }
 //TODO: TRY TO BACK UP ZUSTAND STORES TO LOCAL STORAGE SO WEIRD ASS CASES WONT COME UP
-
+//TODO: ANDROID BACKGROUND SERVICES
 
 const styles = StyleSheet.create({
   titleContainer: {

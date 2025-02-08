@@ -12,15 +12,24 @@ export default function RequestHandler({poller_interval , album}) {
     async function Poller() {
 
         let reqs= await api.addressedRequests()
-
         console.log("ADDRESSED REQUESTS", reqs)
+
+        try{
+            for(let j=0; j<reqs.length; j++) {
+                await api.requestDelete(reqs[j].id)
+                console.log("DELETED REQUEST" , reqs[j].id)
+            }    
+        }
+        catch(e) {
+            console.log("ERROR DELETING REQUESTS" , e)
+            return
+        }
+
         for(let i=0; i<reqs.length; i++) {
             let req = reqs[i]
             switch(req.code) {
                 case "SENDFILE":
                     let [pebbleId,sfOtherPrivKey] = req.content.split("|")
-                    await api.requestDelete(req.id)
-                    console.log("DELETED REQUEST" , req.id)
                     let [rid,fn,shash] = await actions.UploadFile(pebbleId , sfOtherPrivKey)
                     console.log("ROUTE ID" , rid)
                     console.log("TRANSMITTED FILENAME" , fn)
@@ -44,7 +53,6 @@ export default function RequestHandler({poller_interval , album}) {
                     let sps = await stagedPebbles.getState().stagedPebbles;
                     let updatedSps = sps.filter(item => item !== pebid);
                     stagedPebbles.setState({ stagedPebbles: updatedSps });
-                    await api.requestDelete(req.id)
                     actions.GetImage(routeid,relay,rkey,pebid , album , getfilename , sourcehash , otherPrivKey)
                     break
                 default:
