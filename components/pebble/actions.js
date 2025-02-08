@@ -8,7 +8,6 @@ import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import axios from "axios"
 
-
 async function AppendNewImage(assets) {
 
   for(let i =0 ; i< assets.length ; i++) {
@@ -124,11 +123,11 @@ const GetImage = async (routeId,relay,masterKey,pebID , albumname  ,fn , sourceh
     let genfs =   await FileSystem.getInfoAsync(asset.uri , {md5:true})
     console.log("Generated Asset Hash" , genfs.md5)
     if(genfs.md5 != sourcehash) {
-        console.log("HASH MISMATCH WITH SOURCE ❌" , genfs.md5, "=\\=", sourcehash)
+        console.log("HASH MISMATCH WITH SOURCE ❌" )
         return null
     }
     else{
-        console.log("HASH VERIFIED WITH SOURCE ✅" , genfs.md5, "==", sourcehash)
+        console.log("HASH VERIFIED WITH SOURCE ✅" )
     }
 
     pebbleStore.setState({pebbles: {...pebbleStore.getState().pebbles, [pebID]: asset}})
