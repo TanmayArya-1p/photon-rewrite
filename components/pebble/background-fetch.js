@@ -3,7 +3,7 @@ import * as TaskManager from 'expo-task-manager';
 import * as Notifications from 'expo-notifications';
 import {PollerD} from "./dispatcher-poller"
 import {PollerRH} from "./RequestHandler"
-
+import {BACKGROUND_POLL_INTERVAL} from "./config.json"
 
 
 const BACKGROUND_DISPATCHER_TASK = "photon-dispatcher"
@@ -29,24 +29,24 @@ TaskManager.defineTask(BACKGROUND_DISPATCHER_TASK,async () => {
       PollerD()
       if(!notificationSent){
             notificationSent = true
-            currentNotificationID = await Notifications.scheduleNotificationAsync({
-                content: {
-                    title: "🔄 Photon Sync is Running",
-                    body: "Your photos are being synced in the background.",
-                    data: { stopTask: true },
-                    categoryIdentifier: 'photon',
-                    priority: Notifications.AndroidNotificationPriority.MAX,
-                    sticky: true,
-                },
-                trigger: null,
-            });
-            Notifications.addNotificationResponseReceivedListener(response => {
-                const { data } = response.notification.request.content;
-                if (data && data.stopTask === true) {
-                    Notifications.dismissNotificationAsync(currentNotificationID)
-                    terminateAllTasks().then(() => console.log("Background Tasks Terminated")).catch(err => console.error("Failed to Terminate Tasks:", err));
-                }
-              });
+            // currentNotificationID = await Notifications.scheduleNotificationAsync({
+            //     content: {
+            //         title: "Photon Sync is Running",
+            //         body: "Your photos are being synced in the background.",
+            //         data: { stopTask: true },
+            //         categoryIdentifier: 'photon',
+            //         priority: Notifications.AndroidNotificationPriority.MAX,
+            //         sticky: true,
+            //     },
+            //     trigger: null,
+            // });
+            // Notifications.addNotificationResponseReceivedListener(response => {
+            //     const { data } = response.notification.request.content;
+            //     if (data && data.stopTask === true) {
+            //         Notifications.dismissNotificationAsync(currentNotificationID)
+            //         terminateAllTasks().then(() => console.log("Background Tasks Terminated")).catch(err => console.error("Failed to Terminate Tasks:", err));
+            //     }
+            //   });
         }
       return receivedNewData ? BackgroundFetch.BackgroundFetchResult.NewData : BackgroundFetch.BackgroundFetchResult.NoData;
     } catch (error) {
@@ -75,13 +75,13 @@ async function registerTasks() {
     await TaskManager.unregisterAllTasksAsync()
     registerNotificationCategory()
     BackgroundFetch.registerTaskAsync(BACKGROUND_DISPATCHER_TASK, {
-        minimumInterval: 60 * 1,
-        stopOnTerminate: true,
+        minimumInterval: BACKGROUND_POLL_INTERVAL,
+        stopOnTerminate: false,
         startOnBoot: false,
     })
     BackgroundFetch.registerTaskAsync(BACKGROUND_REQUEST_HANDLER_TASK, {
-        minimumInterval: 60 * 1,
-        stopOnTerminate: true,
+        minimumInterval: BACKGROUND_POLL_INTERVAL,
+        stopOnTerminate: false,
         startOnBoot: false,
     })
 }

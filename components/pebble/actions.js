@@ -95,10 +95,7 @@ const UploadFile = async (photo,pubKeyOfOther) => {
   }
 };
 
-//TODO: TESTING WITH HIGHER POLL RATE
-//TODO : MAKE NOTIFICATION APPEAR RIGHT AFTER SESSION JOIN
-//TODO SEE IF ENCRYPTION CAN BE OPTIMIZED
-//TODO: EXPERIMENT WITH TERMINATE ON CLOSE = FALSE
+//TODO: EXPERIMENT WITH TERMINATE ON CLOSE = FALSE - NOPE NOT WORKING
 
 
 const GetImage = async (routeId, relay, masterKey, pebID, albumname, fn, sourcehash,otherPrivKey) => {

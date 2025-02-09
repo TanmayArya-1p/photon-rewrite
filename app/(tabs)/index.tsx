@@ -9,7 +9,15 @@ import {RequestHandler} from "@/components/pebble/RequestHandler"
 
 import * as api from "@/components/pebble/api"
 import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function HomeScreen() {
 
@@ -52,8 +60,6 @@ export default function HomeScreen() {
     </ParallaxScrollView>
   );
 }
-//TODO: TRY TO BACK UP ZUSTAND STORES TO LOCAL STORAGE SO WEIRD ASS CASES WONT COME UP
-//TODO: ANDROID BACKGROUND SERVICES
 
 const styles = StyleSheet.create({
   titleContainer: {

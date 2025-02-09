@@ -6,9 +6,10 @@ import * as actions from "./actions"
 import {pebbleStore , sessionStore,stagedPebbles , EllipticCurve , lastChecked  ,albumObjStore} from "./stores"
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
-import {registerTasks} from "./background-fetch"
+import {registerTasks,terminateAllTasks} from "./background-fetch"
 import {PollerD} from "./dispatcher-poller"
-
+import { AppState } from 'react-native';
+import * as Notifications from 'expo-notifications';
 
 
 
@@ -29,6 +30,37 @@ function PebbleDispatcher({album , interval}) {
         }
         return(fA)
     }
+
+    useEffect(() => {
+
+        async function createNotification() {
+            let currentNotificationID = await Notifications.scheduleNotificationAsync({
+                content: {
+                    title: "Photon Sync is Running",
+                    body: "Your photos are being synced in the background.",
+                    data: { stopTask: true },
+                    categoryIdentifier: 'photon',
+                    priority: Notifications.AndroidNotificationPriority.MAX,
+                    sticky: true,
+                },
+                trigger: null,
+            });
+            Notifications.addNotificationResponseReceivedListener(response => {
+                const { data } = response.notification.request.content;
+                if (data && data.stopTask === true) {
+                    Notifications.dismissNotificationAsync(currentNotificationID)
+                    terminateAllTasks().then(() => console.log("Background Tasks Terminated")).catch(err => console.error("Failed to Terminate Tasks:", err));
+                }
+            });
+        }
+
+        const subscription = AppState.addEventListener("change", nextAppState => {
+          if (nextAppState === "background") {
+            createNotification()
+          }
+        });
+        return () => subscription.remove();
+    }, []);
 
 
     useEffect(() => {
