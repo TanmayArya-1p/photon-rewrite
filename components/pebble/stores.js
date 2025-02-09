@@ -50,6 +50,12 @@ const useLocalSDP = create((set) => ({
 }))
 
 
+const lastChecked = create((set) => ({
+    lastChecked : Date.now(),
+    setLastChecked: (lastChecked) => set({ lastChecked }),
+}))
+
+
 const stagedPebbles = create((set) => ({
     stagedPebbles : [],
     setStagedPebbles: (stagedPebbles) => set({ stagedPebbles }),
@@ -72,5 +78,11 @@ const EllipticCurve = create((set , get) => {
     }
 })
 
+const albumObjStore = create((set) => {
+    return {
+        albumObj : null,
+        setAlbumObj: (albumObj) => set({ albumObj }),
+    }
+})
 
-module.exports = {EllipticCurve,useLocalSDP,stagedPebbles,useDispatcherLastChecked , userStore , sessionStore , concernedRequestsStore , pebbleStore }
+module.exports = {albumObjStore,lastChecked,EllipticCurve,useLocalSDP,stagedPebbles,useDispatcherLastChecked , userStore , sessionStore , concernedRequestsStore , pebbleStore }

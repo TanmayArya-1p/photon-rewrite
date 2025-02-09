@@ -4,8 +4,8 @@ import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import PebbleDispatcher from "@/components/pebble/dispatcher"
-import RequestHandler from "@/components/pebble/RequestHandler"
+import {PebbleDispatcher} from "@/components/pebble/dispatcher"
+import {RequestHandler} from "@/components/pebble/RequestHandler"
 
 import * as api from "@/components/pebble/api"
 import * as Device from 'expo-device';

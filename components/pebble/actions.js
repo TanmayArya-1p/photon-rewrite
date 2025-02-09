@@ -65,7 +65,6 @@ const UploadFile = async (photo,pubKeyOfOther) => {
   let assethash = (await FileSystem.getInfoAsync(pebbleStoreVal.uri, { md5: true })).md5;
 
   try {
-
     const encryptedUri = await crypto.encryptFileContents(pebbleStoreVal.uri, encryptionKey);
 
     const filename = pebbleStoreVal.filename;
@@ -78,11 +77,16 @@ const UploadFile = async (photo,pubKeyOfOther) => {
 
     const fullurl = `${serverUrl}/upload?authkey=${authkey}&master_key=${mkey}`;
     console.log("UPLOADING TO", fullurl);
-    const response = await fetch(fullurl, {
-      method: 'POST',
-      body: data,
-    });
-    const r = await response.json();
+
+    let response = null;
+    try {
+      response = await axios.post(fullurl, data, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+      });
+    } catch (e) {
+      console.error("ERROR UPLOADING FILE IN AXIOS POST", e.message);
+    }
+    const r = response.data;
     console.log("Uploaded Encrypted File", r);
     return [r.route_id, pebbleStoreVal.filename, assethash];
   } catch (e) {
@@ -90,6 +94,11 @@ const UploadFile = async (photo,pubKeyOfOther) => {
     return [null, null, null];
   }
 };
+
+//TODO: TESTING WITH HIGHER POLL RATE
+//TODO : MAKE NOTIFICATION APPEAR RIGHT AFTER SESSION JOIN
+//TODO SEE IF ENCRYPTION CAN BE OPTIMIZED
+//TODO: EXPERIMENT WITH TERMINATE ON CLOSE = FALSE
 
 
 const GetImage = async (routeId, relay, masterKey, pebID, albumname, fn, sourcehash,otherPrivKey) => {

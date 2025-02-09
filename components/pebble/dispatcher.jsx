@@ -3,11 +3,19 @@ import * as api from './api';
 import * as MediaLibrary from 'expo-media-library';
 import {useDispatcherLastChecked} from "./stores"
 import * as actions from "./actions"
-import {pebbleStore , sessionStore,stagedPebbles , EllipticCurve} from "./stores"
+import {pebbleStore , sessionStore,stagedPebbles , EllipticCurve , lastChecked  ,albumObjStore} from "./stores"
+import * as BackgroundFetch from 'expo-background-fetch';
+import * as TaskManager from 'expo-task-manager';
+import {registerTasks} from "./background-fetch"
+import {PollerD} from "./dispatcher-poller"
 
-export default function PebbleDispatcher({album , interval}) {
+
+
+
+
+function PebbleDispatcher({album , interval}) {
     const [_, requestPermission] = MediaLibrary.usePermissions();
-    const [lastChecked , setLastChecked] = useState(Date.now())
+    // const [lastChecked , setLastChecked] = useState(Date.now())
 
 
     async function getAlbum() {
@@ -23,70 +31,12 @@ export default function PebbleDispatcher({album , interval}) {
     }
 
 
-    async function Poller(albumObj) {
-
-        let pebStoreVal = await pebbleStore.getState().pebbles
-        let alreadyDispatched = await stagedPebbles.getState().stagedPebbles
-        console.log("PEBSTORE" , pebStoreVal)
-        console.log("Local Pebbles:", Object.keys(pebStoreVal));
-        try {
-            let smeta = await api.sessionMetadata()
-
-            let pebs = smeta.pebbles
-            console.log("Pebbles:", pebs);
-            
-            for(let i=0; i< pebs.length ; i++) {
-                if (!pebStoreVal[pebs[i].id] && !alreadyDispatched.includes(pebs[i].id)) {
-                    console.log("FINDING SEEDER FOR", pebs[i].id)
-                    let seeder = await api.pebbleFindSeed(pebs[i].id)
-                    if(seeder.found == false) {
-                        console.log("NO SEEDER FOUND FOR", pebs[i].id)
-                        continue
-                    }
-                    alreadyDispatched.push(pebs[i].id)
-                    await actions.BegSeeder(seeder , pebs[i])
-                }
-            }    
-        
-        }
-        catch(e) {
-            console.log("ERROR POLLING SERVER" , e)
-        }
-
-        //CHECKING NEW IMAGES LOCALLY PART
-        setLastChecked(async (prevLastChecked) => {
-            let lc = await prevLastChecked;
-            let albtemp = {}
-            try {
-                //MediaLibrary.getAlbumsAsync().then((r) => console.log(r))
-                albtemp = await MediaLibrary.getAssetsAsync({first:10000 ,album: albumObj , createdAfter: lc , sortBy: "creationTime" , mediaType:"photo"}) 
-                vidtemp = await  MediaLibrary.getAssetsAsync({first:10000 ,album: albumObj , createdAfter: lc , sortBy: "creationTime" , mediaType: "video"})
-                albtemp = albtemp.assets.concat(vidtemp.assets)
-                if(albtemp.length > 0) {
-                    console.log("NEW ASSETS", albtemp)
-                }
-                
-
-                actions.AppendNewImage(albtemp)
-
-    
-            }
-            catch(e) {
-                console.log("ERROR POLLING ASSETS" , e)
-            }
-            return new Date().getTime();
-        })
-
-
-
-    }
-
     useEffect(() => {
         let pollerIntId = 0
         
         async function startup() {
-
             try{
+                await registerTasks()
                 let ec = await EllipticCurve.getState()
                 ec.generateKeyPair()
                 //await api.login("6797bb2bdd1ec3f885a9de6d", "123")
@@ -101,9 +51,10 @@ export default function PebbleDispatcher({album , interval}) {
             }
             try {
                 let al = await getAlbum()
-                Poller(al)
+                albumObjStore.setState({albumObj: al})
+                PollerD(al)
                 pollerIntId = setInterval(() => {
-                    Poller(al)
+                    PollerD()
                 }, interval);
             }
             catch(e) {
@@ -122,3 +73,4 @@ export default function PebbleDispatcher({album , interval}) {
     return <></>
 }
     
+module.exports = {PebbleDispatcher , PollerD}
