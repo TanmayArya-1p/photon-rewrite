@@ -6,6 +6,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import "../global.css"
+import * as SystemUI from 'expo-system-ui';
+import LoginPage from "./login"
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -19,6 +21,7 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    //ystemUI.setBackgroundColorAsync('#000000');
     if (loaded) {
       SplashScreen.hideAsync();
     }
@@ -29,8 +32,9 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+    <ThemeProvider value={colorScheme === 'dark' ? DefaultTheme : DefaultTheme}>
+      <Stack initialRouteName='login'>
+        <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>

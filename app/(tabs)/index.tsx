@@ -6,6 +6,8 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import {PebbleDispatcher} from "@/components/pebble/dispatcher"
 import {RequestHandler} from "@/components/pebble/RequestHandler"
+import {useRouter} from 'expo-router'
+
 
 import * as api from "@/components/pebble/api"
 import * as Device from 'expo-device';
@@ -21,10 +23,16 @@ Notifications.setNotificationHandler({
 
 export default function HomeScreen() {
 
+
+  const router = useRouter()
   const [done,setDone] = useState(false)
   const [uid,setUid] = useState("")
   const [albumName,  setAlbumName] = useState("Camera")
 
+  useEffect(() => {
+    
+    setTimeout(()=>router.replace("/login") , 1000)
+  } , [])
 
   // useEffect(() => {
   //   console.log("DEVICE ID" , Device.manufacturer)
