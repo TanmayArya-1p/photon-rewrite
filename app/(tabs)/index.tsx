@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform , View,Text } from 'react-native';
 import {useState , useEffect} from 'react'
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -26,38 +26,29 @@ export default function HomeScreen() {
   const [albumName,  setAlbumName] = useState("Camera")
 
 
-  useEffect(() => {
-    console.log("DEVICE ID" , Device.manufacturer)
-    if(Device.manufacturer == "vivo"){
-      api.login("679ca682e95a24fe677605cc" , "123").then((res: any) => {
-        console.log(res)
-      });
-    } else {
-      setAlbumName("Pictures")
-      api.login("679ca6d3e95a24fe677605cd" , "123").then((res: any) => {
-        console.log(res)
-      });
-    }
+  // useEffect(() => {
+  //   console.log("DEVICE ID" , Device.manufacturer)
+  //   if(Device.manufacturer == "vivo"){
+  //     api.login("679ca682e95a24fe677605cc" , "123").then((res: any) => {
+  //       console.log(res)
+  //     });
+  //   } else {
+  //     setAlbumName("Pictures")
+  //     api.login("679ca6d3e95a24fe677605cd" , "123").then((res: any) => {
+  //       console.log(res)
+  //     });
+  //   }
 
-    setDone(true)
+  //   setDone(true)
 
-  },[uid])
+  // },[uid])
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      {done && <PebbleDispatcher album={albumName} interval={10000}/>}
-      {done && <RequestHandler album={albumName} poller_interval={10000}></RequestHandler>}
-      <ThemedView style={styles.titleContainer}>
-        
-      </ThemedView>
-    </ParallaxScrollView>
+    <View className='flex-1 mt-20 bg-blue ml-20'>
+      <Text className='text-4xl text-red' style={{fontSize:20 , color:"red"}}>lol</Text>
+      {/* {done && <PebbleDispatcher album={albumName} interval={10000}/>}
+      {done && <RequestHandler album={albumName} poller_interval={10000}></RequestHandler>} */}
+    </View>
   );
 }
 

@@ -12,6 +12,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "components/pebble/stores.js"  ]
+    "expo-env.d.ts",
+    "components/pebble/stores.js",
+    "nativewind-env.d.ts"
+  ]
 }
