@@ -1,4 +1,4 @@
-import {Button, SafeAreaView,Text , View , Image , ActivityIndicator , TouchableOpacity, Linking} from "react-native"
+import {Button, SafeAreaView,Text ,StyleSheet, View , Image , ActivityIndicator , TouchableOpacity, Linking} from "react-native"
 import * as AuthSession from 'expo-auth-session';
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -6,6 +6,7 @@ import { retrieveAuthToken } from "./authFlow";
 import { authConfig, discovery } from "./authConfig";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link } from "@react-navigation/native";
+import { LinearGradient } from 'expo-linear-gradient';
 
 
 
@@ -35,12 +36,12 @@ export default function LoginPage(props) {
             <Image source={require("@/assets/images/photon-text.png")} style={{width:300, height:70}} className="ml-1 mb-32" />
             <TouchableOpacity onPress={() => {
                 LoginWorkflow()
-            }} className="bg-slate-700 p-2 rounded-lg">
-                <View className="flex-row justify-center items-center p-1">
+            }} className="bg-linear-to-r from-cyan-500 to-blue-500 p-2 rounded-xl">
+                <LinearGradient className="flex-row justify-center items-center p-2" style={{borderRadius:10}} colors={['#383775', '#010030']}>
                     <Text className="text-white font-extrabold p-1 text-xl">Sign in</Text>
                     {loading? <ActivityIndicator size={24} color={"#ffffff"}/> : <Ionicons name="log-in" size={24} color="white" />}    
 
-                </View>
+                </LinearGradient>
             </TouchableOpacity>
         </SafeAreaView>
         <View style={{ position: 'absolute', bottom: 20, left: 0, right: 0, alignItems: 'flex-start' }} className="ml-2">
@@ -51,3 +52,29 @@ export default function LoginPage(props) {
     </SafeAreaView>
     </>
 }
+
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'orange',
+    },
+    background: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+      height: 300,
+    },
+    button: {
+      padding: 15,
+      alignItems: 'center',
+      borderRadius: 5,
+    },
+    text: {
+      backgroundColor: 'transparent',
+      fontSize: 15,
+      color: '#fff',
+    },
+  });

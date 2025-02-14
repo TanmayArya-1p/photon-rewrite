@@ -60,6 +60,12 @@
           "savePhotosPermission": "Allow Photon to save photos.",
           "isAccessMediaLocationEnabled": true
         }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true
+        }
       ]
     ],
     "experiments": {
