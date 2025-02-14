@@ -66,6 +66,12 @@
         {
           "configureAndroidBackup": true
         }
+      ],
+      [
+        "expo-barcode-scanner",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access camera."
+        }
       ]
     ],
     "experiments": {

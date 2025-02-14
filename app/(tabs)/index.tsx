@@ -1,19 +1,16 @@
-import { Image, StyleSheet, Platform , View,Text } from 'react-native';
+import { Image, StyleSheet, Platform , View,Text, SafeAreaView, ActivityIndicator } from 'react-native';
 import {useState , useEffect} from 'react'
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import {PebbleDispatcher} from "@/components/pebble/dispatcher"
 import {RequestHandler} from "@/components/pebble/RequestHandler"
 import {useRouter} from 'expo-router'
 import * as SecureStorage from "expo-secure-store"
 import {userStore} from "./../stores/user"
-
+import initiateCard from "@/components/initiateCard"
 import * as api from "@/components/pebble/api"
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { validateAccessToken } from '../authFlow';
+import InitiateCard from '@/components/initiateCard';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -23,6 +20,11 @@ Notifications.setNotificationHandler({
   }),
 });
 
+
+function fixName(name : string) {
+  return name[0].toUpperCase() + name.slice(1).toLowerCase()
+}
+
 export default function HomeScreen() {
 
 
@@ -31,6 +33,7 @@ export default function HomeScreen() {
   const [uid,setUid] = useState("")
   const [albumName,  setAlbumName] = useState("Camera")
   const [verified, setVerified] = useState(false)
+  const [user,setUser] = useState(null)
 
   useEffect(() => {
     //FIRST VERIFY IF BRO IS AUTHENTICATED
@@ -38,10 +41,12 @@ export default function HomeScreen() {
     async function verify() {
       let accessToken = await SecureStorage.getItemAsync("accesstoken")
       let status = await validateAccessToken(accessToken)
-      let user = await userStore.getState()
-      console.log("LOCAL USER" , user.user)
       if(status){
+        let user = await userStore.getState()
+        console.log("LOCAL USER" , user.user)
+        setUser(user.user)
         setVerified(true)
+
         console.log("VERIFIED USER")
       } else {
         router.replace("/login")
@@ -49,7 +54,7 @@ export default function HomeScreen() {
     }
     verify()
     
-  } , [])
+  } , [setUser])
 
   // useEffect(() => {
   //   console.log("DEVICE ID" , Device.manufacturer)
@@ -68,12 +73,25 @@ export default function HomeScreen() {
 
   // },[uid])
 
+  if(!verified) {
+    return <SafeAreaView className="flex-1 bg-white items-center justify-center w-full">
+      <ActivityIndicator size={50} color="#0000ff" />
+    </SafeAreaView>
+  }
+
   return (
-    <View className='flex-1 mt-20 bg-blue ml-20'>
-      <Text className='text-4xl text-red' style={{fontSize:20 , color:"red"}}>lol</Text>
+    <SafeAreaView className="flex-1 bg-white items-center justify-center w-full">
+      <View className="flex-1 mt-[20%] w-[90%] items-center">
+        <Text className="italic text-4xl ">Welcome {fixName(user.name.split(" ")[0])}</Text>
+        <InitiateCard user={user}></InitiateCard>
+
+
+
+
+      </View>
       {/* {done && <PebbleDispatcher album={albumName} interval={10000}/>}
       {done && <RequestHandler album={albumName} poller_interval={10000}></RequestHandler>} */}
-    </View>
+    </SafeAreaView>
   );
 }
 
