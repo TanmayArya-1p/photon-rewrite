@@ -7,11 +7,13 @@ import { ThemedView } from '@/components/ThemedView';
 import {PebbleDispatcher} from "@/components/pebble/dispatcher"
 import {RequestHandler} from "@/components/pebble/RequestHandler"
 import {useRouter} from 'expo-router'
-
+import * as SecureStorage from "expo-secure-store"
+import {userStore} from "./../stores/user"
 
 import * as api from "@/components/pebble/api"
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
+import { validateAccessToken } from '../authFlow';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -28,10 +30,25 @@ export default function HomeScreen() {
   const [done,setDone] = useState(false)
   const [uid,setUid] = useState("")
   const [albumName,  setAlbumName] = useState("Camera")
+  const [verified, setVerified] = useState(false)
 
   useEffect(() => {
+    //FIRST VERIFY IF BRO IS AUTHENTICATED
+
+    async function verify() {
+      let accessToken = await SecureStorage.getItemAsync("accesstoken")
+      let status = await validateAccessToken(accessToken)
+      let user = await userStore.getState()
+      console.log("LOCAL USER" , user.user)
+      if(status){
+        setVerified(true)
+        console.log("VERIFIED USER")
+      } else {
+        router.replace("/login")
+      }
+    }
+    verify()
     
-    setTimeout(()=>router.replace("/login") , 1000)
   } , [])
 
   // useEffect(() => {
