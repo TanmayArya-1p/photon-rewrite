@@ -1,14 +1,14 @@
-import { Image, StyleSheet, Platform , View,Text, SafeAreaView, ActivityIndicator } from 'react-native';
+import { Image, StyleSheet, Platform , View,Text, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import {useState , useEffect} from 'react'
-import {PebbleDispatcher} from "@/components/pebble/dispatcher"
-import {RequestHandler} from "@/components/pebble/RequestHandler"
 import {useRouter} from 'expo-router'
 import * as SecureStorage from "expo-secure-store"
-import {userStore} from "./../stores/user"
+import {userStore} from "../stores/user"
+import { pebbleUserStore } from '../stores/pebble';
 import initiateCard from "@/components/initiateCard"
 import * as api from "@/components/pebble/api"
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
+import * as sessionFlow from "../sessionFlow"
 import { validateAccessToken } from '../authFlow';
 import InitiateCard from '@/components/initiateCard';
 
@@ -21,7 +21,7 @@ Notifications.setNotificationHandler({
 });
 
 
-function fixName(name : string) {
+function fixName(name) {
   return name[0].toUpperCase() + name.slice(1).toLowerCase()
 }
 
@@ -29,11 +29,67 @@ export default function HomeScreen() {
 
 
   const router = useRouter()
-  const [done,setDone] = useState(false)
-  const [uid,setUid] = useState("")
-  const [albumName,  setAlbumName] = useState("Camera")
   const [verified, setVerified] = useState(false)
   const [user,setUser] = useState(null)
+
+
+  async function createSessionHandler(sesKey) {
+    console.log("CREATE")
+
+    try {
+      console.log(0)
+
+      let res = await api.createSession(sesKey)
+      if(res==null) {
+        Alert.alert("Error Creating Session")
+        return
+      }
+      console.log(1)
+      res = res["SessionID"]
+      console.log(3)
+
+      let status = sessionFlow.CreateSession(sesKey , res)
+      console.log(2)
+
+      if(status) {
+        console.log("SESSION CREATED")
+        router.navigate("/session")
+      } else {
+        console.log("ERROR CREATING SESSION")
+        Alert.alert("Error Creating Session")
+      }
+    } catch(e) {
+      Alert.alert("Error Creating Session : "  + e.message)
+    }
+
+  }
+
+
+  async function joinSessionHandler(connectionString) {
+    console.log("JOIN")
+    let [sesID ,sesKey , pebbleDB] = connectionString.split("|")
+    try {
+      console.log(0,sesID,sesKey)
+      let apiresp = await api.joinSession(sesID,sesKey)
+      if(apiresp == null) {
+        Alert.alert("Error Joining Session")
+        return
+      }
+      console.log(1)
+      let status = sessionFlow.JoinSession(sesKey , sesID)
+      console.log(2)
+      if(status) {
+        console.log("SESSION JOINED")
+        router.navigate("/session")
+      } else {
+        console.log("ERROR JOINING SESSION")
+        Alert.alert("Error Joining Session")
+      }
+    } catch(e) {
+      Alert.alert("Error Joining Session : "  + e.message)
+    }
+
+  }
 
   useEffect(() => {
     //FIRST VERIFY IF BRO IS AUTHENTICATED
@@ -44,6 +100,14 @@ export default function HomeScreen() {
       if(status){
         let user = await userStore.getState()
         console.log("LOCAL USER" , user.user)
+        setUser(user.user)
+        await pebbleUserStore.setState({PebbleClientID : user.user.pebble_uid , PebbleClientSecret : user.user.pebble_secret })
+        let res = await api.login(user.user.pebble_uid , user.user.pebble_password)
+        if(res["InSession"]!= "") {
+          console.log("ALREADY IN SESSION")
+          user.user.is_alive = true
+          user.user.insession = res["InSession"]
+        }
         setUser(user.user)
         setVerified(true)
 
@@ -81,9 +145,9 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center w-full">
-      <View className="flex-1 mt-[20%] w-[90%] items-center">
+      <View className="flex-1 mt-[10%] w-[90%] items-center">
         <Text className="italic text-4xl ">Welcome {fixName(user.name.split(" ")[0])}</Text>
-        <InitiateCard user={user}></InitiateCard>
+        <InitiateCard createSessionHandler={createSessionHandler} joinSessionHandler={joinSessionHandler} user={user}></InitiateCard>
 
 
 

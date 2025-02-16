@@ -1,16 +1,19 @@
-import {View, Text , TouchableOpacity, TextInput , StyleSheet, Button} from 'react-native'
+import {View, Text , TouchableOpacity, TextInput , StyleSheet, Button, Alert , Modal} from 'react-native'
 import { useEffect } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import {useState} from 'react'
 import { CameraView, Camera } from "expo-camera";
+import CreateSessionModal from './createSessionModal';
+import * as api from "@/components/pebble/api"
 
-
-export default function InitiateCard({user}) {
+export default function InitiateCard({user,createSessionHandler , joinSessionHandler}) {
     const [connectionString, setConnectionString] = useState("")
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
     const [scannerOpened , setScannerOpened] = useState(false)
+    const [modalVisible , setModalVisible] = useState(false)
+    const [modalSesKey, setModalSesKey] = useState("")
   
     useEffect(() => {
       const getCameraPermissions = async () => {
@@ -20,6 +23,7 @@ export default function InitiateCard({user}) {
   
       getCameraPermissions();
     }, []);
+
   
     const handleBarcodeScanned = ({ type, data }) => {
       setScanned(true);
@@ -89,7 +93,7 @@ export default function InitiateCard({user}) {
                     </TouchableOpacity>
                 </View>
                 
-                <TouchableOpacity onPress={() => console.log(1)} className="p-2 shadow-xl mt-1">
+                <TouchableOpacity onPress={() => joinSessionHandler(connectionString)} className="p-2 shadow-xl mt-1">
                     <LinearGradient
                         className="flex-row justify-center items-center p-2"
                         style={{ borderRadius: 7 }}
@@ -103,7 +107,7 @@ export default function InitiateCard({user}) {
 
           <View className="flex-col mt-2 w-[90%] mb-2">
 
-            <TouchableOpacity onPress={() => console.log(1)} className="p-2 shadow-xl">
+            <TouchableOpacity onPress={() => setModalVisible(true)} className="p-2 shadow-xl">
               <LinearGradient
                 className="flex-row justify-center items-center p-2"
                 style={{ borderRadius: 7 }}
@@ -115,6 +119,8 @@ export default function InitiateCard({user}) {
             </TouchableOpacity>
           </View>
         </View>}
+        <CreateSessionModal modalVisible={modalVisible} setModalVisible={setModalVisible} sesKeyState={modalSesKey}></CreateSessionModal>
       </>
     )
 }
+

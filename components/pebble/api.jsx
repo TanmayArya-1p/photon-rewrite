@@ -22,14 +22,16 @@ async function login(uid,pwd) {
         let resp = await axios.request(config)
         userStore.setState({uid : uid , secret: resp.data["ClientSecret"]})
         console.log(resp.data)
+        if(resp.data["InSession"]!="") {
+            joinSession(resp.data["InSession"],resp.data["SessionKey"])
+        }
         return resp.data
     }
     catch(e) {
-        console.log("ERROR ON LOGIN" , uid,pwd)
+        console.log("ERROR ON LOGIN" , uid,pwd , e.message)
         return null
     }
 }
-
 
 async function register(username,password) {
     let data = new FormData();
@@ -109,6 +111,7 @@ async function joinSession(sesID , sesKey) {
     try {
         let resp = await axios.request(config)
         sessionStore.setState({sesID: sesID , sesKey: sesKey})
+        console.log("JOIN SESSION RESPONSE" , resp.data)
         return resp.data
     }
     catch(e) {

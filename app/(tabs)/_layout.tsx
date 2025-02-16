@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
-
+import { Platform, Image, TouchableOpacity } from 'react-native';
+import { Link } from 'expo-router';
 import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
@@ -12,12 +12,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
-
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
+        headerShown: true,
+        headerStyle: { backgroundColor: "#fcfced" },
+        headerTitle: ()=> <Link href="/"><Image source={require("@/assets/images/photon-text.png")} style={{width: 150 , height: 30}}/></Link>,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
