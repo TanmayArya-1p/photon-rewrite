@@ -1,4 +1,4 @@
-import { SafeAreaView , Text , ActivityIndicator,View, TouchableOpacity,Share } from "react-native";
+import { SafeAreaView , Text , ActivityIndicator,View, TouchableOpacity,Share, Alert } from "react-native";
 import {userStore} from "../stores/user"
 import { useEffect , useState } from "react";
 import {PebbleDispatcher} from "@/components/pebble/dispatcher"
@@ -8,7 +8,8 @@ import {pebbleStore , sessionStore} from "@/components/pebble/stores"
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "react-native-web";
 import * as Clipboard from 'expo-clipboard';
-
+import QrModal from "@/components/qrModal"
+import * as sessionFlow from "./../sessionFlow"
 
 export default function SessionPage(props) {
     const { user, setUser } = userStore()
@@ -17,6 +18,7 @@ export default function SessionPage(props) {
     const {pebbles: ps} = pebbleStore()
     const {sesID , sesKey } = sessionStore()
     const [connectionString , setConnectionString] = useState("")
+    const [qrOpened , setQrOpened] = useState(false)
 
     useEffect(() => {
         if(user.is_alive == false) return
@@ -35,6 +37,18 @@ export default function SessionPage(props) {
     }
 
 
+    async function LeaveSessionHandler() {
+        console.log("LEAVE")
+        try {
+            await api.leaveSession(sesID)
+            console.log("DONE PEBBLE LEAVE SESSION")
+            await sessionFlow.LeaveSession(sesKey ,sesID)
+            console.log("DONE SESSION FLOW LEAVE SESSION")
+        } catch(e) {
+            Alert.alert("Error Leaving Session" , e.message)
+        }
+        
+    }
 
 
     if(!done) {
@@ -59,7 +73,7 @@ export default function SessionPage(props) {
         <View className="mt-5 bg-blue-950 p-2 flex-row rounded-tr-xl justify-between rounded-tl-xl w-[90%]">
             <Text className="text-white font-extrabold justify-center mt-1">Connection String</Text>
             <View className="flex-row">
-                <TouchableOpacity className="bg-blue-500 rounded-md mx-3 p-1 items-center justify-center">
+                <TouchableOpacity className="bg-blue-500 rounded-md mx-3 p-1 items-center justify-center" onPress={() => setQrOpened(true)}>
                     <Ionicons name="qr-code-outline" size={20} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => Clipboard.setStringAsync(connectionString)} className="bg-blue-500 rounded-md p-1 items-center justify-center">
@@ -78,12 +92,12 @@ export default function SessionPage(props) {
                 <Ionicons name="person-add-outline" className="mr-2" size={20} color="black" />
                 <Text className="text-center font-bold text-black">Invite Friends</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="flex-row items-center justify-center bg-red-100 p-2 rounded-lg w-[49%]">
+            <TouchableOpacity onPress={LeaveSessionHandler} className="flex-row items-center justify-center bg-red-100 p-2 rounded-lg w-[49%]">
                 <Ionicons name="exit-outline" className="mr-2" size={20} color="black" />
                 <Text className="text-center font-bold text-black">Leave</Text>
             </TouchableOpacity>
         </View>
-
+        <QrModal isVisible={qrOpened} setIsVisible={setQrOpened} connectionString={connectionString} />
         {/* {done && <PebbleDispatcher album={albumName} interval={10000} />}
         {done && <RequestHandler album={albumName} poller_interval={10000} />} */}
     </SafeAreaView>

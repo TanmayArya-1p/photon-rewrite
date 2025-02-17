@@ -73,10 +73,41 @@ async function CreateSession(sessionkey ,sessionid) {
 }
 
 
+async function LeaveSession(sessionkey ,sessionid) {
+    let user = userStore.getState()
+    let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: SERVER_URL + '/leave-session',
+    headers: { 
+        'Content-Type': 'application/json',
+        'Authorization' : `Bearer ${user.accessToken}`
+    },
+    data : {
+        'session_key':sessionkey,
+        'session_id':sessionid
+    }
+    };
+
+    try {
+        let resp = await axios.request(config)
+        console.log(resp.data)
+        let updState={ ...user, user: {...user.user,is_alive:false, in_session:"000000000000000000000000"} }
+        await userStore.setState(updState);
+        console.log("USER STATE UPDATED AFTER DELETE" , updState)
+        return true,resp.data
+    }
+    catch(e) {
+        return false,e.message
+    }
+}
+
+
 
 module.exports= {
     JoinSession,
-    CreateSession
+    CreateSession,
+    LeaveSession
 }
 
 

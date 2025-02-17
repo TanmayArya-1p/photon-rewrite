@@ -31,7 +31,7 @@ export default function HomeScreen() {
   const router = useRouter()
   const [verified, setVerified] = useState(false)
   const [user,setUser] = useState(null)
-
+  const [modalVisible, setModalVisible] = useState(false)
 
   async function createSessionHandler(sesKey) {
     console.log("CREATE")
@@ -53,6 +53,7 @@ export default function HomeScreen() {
 
       if(status) {
         console.log("SESSION CREATED")
+        setModalVisible(false)
         router.navigate("/session")
       } else {
         console.log("ERROR CREATING SESSION")
@@ -80,6 +81,8 @@ export default function HomeScreen() {
       console.log(2,status)
       if(status) {
         console.log("SESSION JOINED")
+        setModalVisible(false)
+
         router.navigate("/session")
       } else {
         console.log("ERROR JOINING SESSION")
@@ -107,6 +110,7 @@ export default function HomeScreen() {
           console.log("ALREADY IN SESSION")
           user.user.is_alive = true
           user.user.insession = res["InSession"]
+          setModalVisible(false)
           router.navigate("/session")
         }
         setUser(user.user)
@@ -115,6 +119,7 @@ export default function HomeScreen() {
 
         console.log("VERIFIED USER")
       } else {
+        setModalVisible(false)
         router.replace("/login")
       }
     }
@@ -149,7 +154,7 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-white items-center justify-center w-full">
       <View className="flex-1 mt-[10%] w-[90%] items-center">
         <Text className="italic text-4xl ">Welcome {fixName(user.name.split(" ")[0])}</Text>
-        <InitiateCard createSessionHandler={createSessionHandler} joinSessionHandler={joinSessionHandler} user={user}></InitiateCard>
+        <InitiateCard modalVisible={modalVisible} setModalVisible={setModalVisible} createSessionHandler={createSessionHandler} joinSessionHandler={joinSessionHandler} user={user}></InitiateCard>
 
 
 

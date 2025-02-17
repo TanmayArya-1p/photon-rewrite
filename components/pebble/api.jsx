@@ -127,21 +127,18 @@ async function joinSession(sesID , sesKey) {
 
 
 
-async function leaveSession() {
+async function leaveSession(sid) {
     let uid = await userStore.getState().uid;
     let secret = await userStore.getState().secret;
     
-    let data = new FormData();
     let config = {
-    method: 'delete',
-    maxBodyLength: Infinity,
-    url: SERVER_URL+'/session/leave?sid=' + sessionStore.getState().sesID,
-    headers: { 
-        'uid': uid, 
-        'secret': secret,
-        'Content-Type': 'multipart/form-data'
-    },
-    data : data
+        method: 'delete',
+        maxBodyLength: Infinity,
+        url: SERVER_URL+'/session/leave?sid=' + sid,
+        headers: { 
+            'uid': uid, 
+            'secret': secret
+        }
     };
 
     try {
@@ -150,7 +147,7 @@ async function leaveSession() {
         return resp.data
     }
     catch(e) {
-        console.log(e)
+        console.log("ERROR SENDING LEAVE REQUEST TO pebbleDB" , e.message)
         return null
     }
 

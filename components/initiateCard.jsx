@@ -7,12 +7,12 @@ import { CameraView, Camera } from "expo-camera";
 import CreateSessionModal from './createSessionModal';
 import * as api from "@/components/pebble/api"
 
-export default function InitiateCard({user,createSessionHandler , joinSessionHandler}) {
+export default function InitiateCard({user,createSessionHandler , joinSessionHandler,setModalVisible,modalVisible}) {
     const [connectionString, setConnectionString] = useState("")
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
     const [scannerOpened , setScannerOpened] = useState(false)
-    const [modalVisible , setModalVisible] = useState(false)
+    // const [modalVisible , setModalVisible] = useState(false)
     const [modalSesKey, setModalSesKey] = useState("")
   
     useEffect(() => {
@@ -24,6 +24,9 @@ export default function InitiateCard({user,createSessionHandler , joinSessionHan
       getCameraPermissions();
     }, []);
 
+    useEffect(()=> {
+
+    })
   
     const handleBarcodeScanned = ({ type, data }) => {
       setScanned(true);
