@@ -20,7 +20,7 @@ function PebbleDispatcher({album , interval}) {
 
 
     async function getAlbum() {
-        await requestPermission();
+        //await requestPermission();
         let fA = null
         try {
             fA = await MediaLibrary.getAlbumAsync(album);
@@ -74,8 +74,8 @@ function PebbleDispatcher({album , interval}) {
                 //await api.login("6797bb2bdd1ec3f885a9de6d", "123")
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 //await api.createSession("123")
-                await api.joinSession("679c1be0c164c81ac770449b" , "123")
-                await sessionStore.setState({sesID: "679c1be0c164c81ac770449b"})
+                //await api.joinSession("679c1be0c164c81ac770449b" , "123")
+                //await sessionStore.setState({sesID: "679c1be0c164c81ac770449b"})
 
             }
             catch(e) {

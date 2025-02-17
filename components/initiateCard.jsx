@@ -119,7 +119,7 @@ export default function InitiateCard({user,createSessionHandler , joinSessionHan
             </TouchableOpacity>
           </View>
         </View>}
-        <CreateSessionModal modalVisible={modalVisible} setModalVisible={setModalVisible} sesKeyState={modalSesKey}></CreateSessionModal>
+        <CreateSessionModal createSessionHandler={createSessionHandler} modalVisible={modalVisible} setModalVisible={setModalVisible} sesKeyState={modalSesKey} setSesKeyState={setModalSesKey}></CreateSessionModal>
       </>
     )
 }

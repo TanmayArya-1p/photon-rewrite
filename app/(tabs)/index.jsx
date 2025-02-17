@@ -46,10 +46,10 @@ export default function HomeScreen() {
       }
       console.log(1)
       res = res["SessionID"]
-      console.log(3)
+      console.log(3,res)
 
-      let status = sessionFlow.CreateSession(sesKey , res)
-      console.log(2)
+      let status = await sessionFlow.CreateSession(sesKey , res)
+      console.log(2,status)
 
       if(status) {
         console.log("SESSION CREATED")
@@ -76,8 +76,8 @@ export default function HomeScreen() {
         return
       }
       console.log(1)
-      let status = sessionFlow.JoinSession(sesKey , sesID)
-      console.log(2)
+      let status = await sessionFlow.JoinSession(sesKey , sesID)
+      console.log(2,status)
       if(status) {
         console.log("SESSION JOINED")
         router.navigate("/session")
@@ -107,8 +107,10 @@ export default function HomeScreen() {
           console.log("ALREADY IN SESSION")
           user.user.is_alive = true
           user.user.insession = res["InSession"]
+          router.navigate("/session")
         }
         setUser(user.user)
+        userStore.setState({user: user.user})
         setVerified(true)
 
         console.log("VERIFIED USER")
