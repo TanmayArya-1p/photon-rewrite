@@ -67,8 +67,12 @@ export default function HomeScreen() {
 
 
   async function joinSessionHandler(connectionString) {
+    if(!connectionString.startsWith("photon|")) {
+      Alert.alert("Invalid Connection String")
+      return
+    }
     console.log("JOIN")
-    let [sesID ,sesKey , pebbleDB] = connectionString.split("|")
+    let [useless,sesID ,sesKey , pebbleDB] = connectionString.split("|")
     try {
       console.log(0,sesID,sesKey)
       let apiresp = await api.joinSession(sesID,sesKey)
@@ -153,7 +157,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center w-full">
       <View className="flex-1 mt-[10%] w-[90%] items-center">
-        <Text className="text-3xl ">Welcome {fixName(user.name.split(" ")[0])}</Text>
+        <Text className="text-3xl font-thin ">Welcome {fixName(user.name.split(" ")[0])}</Text>
         <InitiateCard modalVisible={modalVisible} setModalVisible={setModalVisible} createSessionHandler={createSessionHandler} joinSessionHandler={joinSessionHandler} user={user}></InitiateCard>
 
 

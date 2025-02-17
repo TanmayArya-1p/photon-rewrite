@@ -25,7 +25,7 @@ export default function SessionPage(props) {
         api.login(user.pebble_uid , user.pebble_password).then(()=> {
             console.log("Logged in to PebbleDB" ,res)
         })
-        setConnectionString(sesID + "|" + sesKey + "|" + "lol.onetincan.tech")
+        setConnectionString("photon|"+sesID + "|" + sesKey + "|" + "lol.onetincan.tech")
         setDone(true)
     },[user])
 
@@ -116,7 +116,7 @@ export default function SessionPage(props) {
         </View>
 
         <View className="p-3 bg-blue-900 shadow-blue-900 shadow-2xl rounded-br-xl rounded-bl-xl w-[90%]">
-            <Text className="text-sm text-white">{connectionString.slice(0,50) + "..."}</Text>
+            <Text className="text-sm text-white">{connectionString.slice(0,40) + "..."}</Text>
         </View>
         <View className="mt-4 flex-row justify-between w-[90%]">
             <TouchableOpacity onPress={() => Share.share({

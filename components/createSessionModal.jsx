@@ -28,7 +28,7 @@ export default function CreateSessionModal({modalVisible , setModalVisible , ses
                 <Text style={{marginTop:10 , marginLeft:10 , fontWeight:"bold" , fontSize:15 , textAlign:"center"}}>Your Session Key acts like a password for your Session</Text>
                 <View style={{flexDirection:"col", width:"100%" ,justifyContent:"center" , alignItems:"center"}}>
                     <View style={{flexDirection:"row" , justifyContent:"center" , alignItems:"center" , width:"100%"}}>
-                        <TextInput secureTextEntry={!isVisible} style={{borderRadius:10 ,backgroundColor:"white" , padding:10 ,width:"70%" ,marginTop:26 , alignContent:"center"}} value={sesKeyState} onChangeText={(a)=>setSesKeyState(a)}></TextInput>
+                        <TextInput secureTextEntry={!isVisible} placeholder='Session Key' style={{borderRadius:10 ,backgroundColor:"white" , padding:10 ,width:"70%" ,marginTop:26 , alignContent:"center"}} value={sesKeyState} onChangeText={(a)=>setSesKeyState(a)}></TextInput>
                         <TouchableOpacity onPress={() => setIsVisible(a=>!a)} style={{backgroundColor:"white" , padding:10 , borderRadius:10 , marginTop:26 , marginLeft:10}}>
                             <Ionicons name="eye-outline" size={20}></Ionicons>
                         </TouchableOpacity>
