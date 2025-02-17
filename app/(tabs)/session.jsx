@@ -19,7 +19,7 @@ export default function SessionPage(props) {
     const {sesID , sesKey } = sessionStore()
     const [connectionString , setConnectionString] = useState("")
     const [qrOpened , setQrOpened] = useState(false)
-
+    const [leaving, setLeaving] = useState(false)
     useEffect(() => {
         if(user.is_alive == false) return
         api.login(user.pebble_uid , user.pebble_password).then(()=> {
@@ -28,6 +28,12 @@ export default function SessionPage(props) {
         setConnectionString(sesID + "|" + sesKey + "|" + "lol.onetincan.tech")
         setDone(true)
     },[user])
+
+    useEffect(() => {
+        if(user.is_alive == true) return
+        setLeaving(false)
+    },[user])
+
 
     if(user.is_alive == false) {
         return <SafeAreaView className="flex-1 justify-center align-center bg-white">
@@ -38,6 +44,25 @@ export default function SessionPage(props) {
 
 
     async function LeaveSessionHandler() {
+        await new Promise((resolve, reject) => {
+            Alert.alert(
+                "Leave Session",
+                "Are you sure you want to leave?",
+                [
+                    {
+                        text: "Cancel",
+                        onPress: () => reject(new Error("Leave session cancelled")),
+                        style: "cancel"
+                    },
+                    {
+                        text: "Yes",
+                        onPress: resolve
+                    }
+                ],
+                { cancelable: false }
+            );
+        });
+        setLeaving(true)
         console.log("LEAVE")
         try {
             await api.leaveSession(sesID)
@@ -54,9 +79,17 @@ export default function SessionPage(props) {
     if(!done) {
         return <SafeAreaView className="flex-1 bg-white items-center justify-center w-full">
         <ActivityIndicator size={50} color="#0000ff" />
-        <Text className="text-black">Logging in to PebbleDB</Text>
+        <Text className="text-black font-bold mt-4">Logging in to PebbleDB</Text>
       </SafeAreaView>
     }
+
+    if(leaving) {
+        return <SafeAreaView className="flex-1 bg-white items-center justify-center w-full">
+            <ActivityIndicator size={50} color="#0000ff" />
+            <Text className="text-black font-bold mt-4">Leaving Session</Text>
+        </SafeAreaView>
+    }
+
     return <SafeAreaView className="flex-1 bg-white items-center w-full">
         <View className="mt-[10%] w-[90%] ml-[10%] items-center flex-row">
             <Ionicons name="sync-outline" className="p-4" size={50} color="black" />

@@ -153,7 +153,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center w-full">
       <View className="flex-1 mt-[10%] w-[90%] items-center">
-        <Text className="italic text-4xl ">Welcome {fixName(user.name.split(" ")[0])}</Text>
+        <Text className="text-3xl ">Welcome {fixName(user.name.split(" ")[0])}</Text>
         <InitiateCard modalVisible={modalVisible} setModalVisible={setModalVisible} createSessionHandler={createSessionHandler} joinSessionHandler={joinSessionHandler} user={user}></InitiateCard>
 
 
