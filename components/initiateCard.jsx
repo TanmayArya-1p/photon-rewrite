@@ -6,8 +6,10 @@ import {useState} from 'react'
 import { CameraView, Camera } from "expo-camera";
 import CreateSessionModal from './createSessionModal';
 import * as api from "@/components/pebble/api"
+import {userStore} from "@/app/stores/user"
 
-export default function InitiateCard({user,createSessionHandler , joinSessionHandler,setModalVisible,modalVisible}) {
+export default function InitiateCard({createSessionHandler , joinSessionHandler,setModalVisible,modalVisible}) {
+    const {user} = userStore()
     const [connectionString, setConnectionString] = useState("")
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);

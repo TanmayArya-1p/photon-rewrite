@@ -1,11 +1,19 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
-import {Modal, View, Text, TextInput, TouchableOpacity} from 'react-native'
-import { useState } from 'react'
+import {Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator} from 'react-native'
+import { useEffect, useState } from 'react'
 
 
 export default function CreateSessionModal({modalVisible , setModalVisible , sesKeyState , setSesKeyState,createSessionHandler}) {
     const [isVisible, setIsVisible] = useState(false)
     const [txt , setTxt] = useState("")
+    const [loading , setLoading] = useState(false)
+
+    useEffect(() => {
+        if(modalVisible==false){
+            setLoading(false)
+        }
+    },[modalVisible])
+
     return <>         
         <Modal 
         animationType='slide'
@@ -26,9 +34,11 @@ export default function CreateSessionModal({modalVisible , setModalVisible , ses
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity onPress={()=> {
+                        setLoading(true)
                         console.log("SESKEYSTATE" , sesKeyState)
-                        createSessionHandler(sesKeyState)}} style={{backgroundColor:"#2c4991" , padding:10 , borderRadius:10 , marginTop:16 , marginLeft:10 , marginRight:10}}>
+                        createSessionHandler(sesKeyState)}} style={{flexDirection:"row",backgroundColor:"#2c4991" , padding:10 , borderRadius:10 , marginTop:16 , marginLeft:10 , marginRight:10}}>
                         <Text style={{color:"white" , textAlign:"center" , fontWeight:"bold"}}>Create Session</Text>
+                        {loading && <ActivityIndicator style={{marginLeft:5}} color={"white"}></ActivityIndicator>}
                     </TouchableOpacity>
                 </View>
             </View>
