@@ -13,7 +13,7 @@ import { validateAccessToken } from '../authFlow';
 import InitiateCard from '@/components/initiateCard';
 import * as MediaLibrary from 'expo-media-library';
 import * as Haptics from 'expo-haptics';
-
+import {Link} from 'expo-router';
 
 
 Notifications.setNotificationHandler({
@@ -30,7 +30,6 @@ function fixName(name) {
 }
 
 export default function HomeScreen() {
-
 
   const router = useRouter()
   const [verified, setVerified] = useState(false)
@@ -169,9 +168,6 @@ export default function HomeScreen() {
       <View className="flex-1 mt-[10%] w-[90%] items-center">
         <Text className="text-3xl font-thin ">Welcome {fixName(user.name.split(" ")[0])}</Text>
         <InitiateCard modalVisible={modalVisible} setModalVisible={setModalVisible} createSessionHandler={createSessionHandler} joinSessionHandler={joinSessionHandler} user={user}></InitiateCard>
-
-
-
 
       </View>
       {/* {done && <PebbleDispatcher album={albumName} interval={10000}/>}

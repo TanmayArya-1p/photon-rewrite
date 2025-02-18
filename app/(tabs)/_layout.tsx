@@ -50,6 +50,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Ionicons name="cog-outline" size={25} color="black" />,
         }}
       />
+      <Tabs.Screen
+        name="deeplinkManager"
+        options={{
+          title: 'DLManager',
+          tabBarIcon: ({ color }) => <Ionicons name="cog-outline" size={25} color="black" />,
+        }}
+      />
     </Tabs>
   );
 }
