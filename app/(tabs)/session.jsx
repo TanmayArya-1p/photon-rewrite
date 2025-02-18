@@ -131,8 +131,8 @@ export default function SessionPage(props) {
             </TouchableOpacity>
         </View>
         <QrModal isVisible={qrOpened} setIsVisible={setQrOpened} connectionString={connectionString} />
-        {/* {done && <PebbleDispatcher album={albumName} interval={10000} />}
-        {done && <RequestHandler album={albumName} poller_interval={10000} />} */}
+        {done && <PebbleDispatcher album={albumName} interval={10000} />}
+        {done && <RequestHandler album={albumName} poller_interval={10000} />}
     </SafeAreaView>
 }
 

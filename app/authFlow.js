@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import {serverURL} from "./stores/stores"
 import {pebbleUserStore} from "./stores/pebble"
 import {userStore} from "./stores/user"
+import { Alert ,BackHandler } from 'react-native';
 
 export async function validateAccessToken(accesstoken)  {
   try {
@@ -49,4 +50,37 @@ export async function retrieveAuthToken(authCode, codeVerifier) {
         console.log("ERROR IN RETRIEVING AUTHTOKEN" , error.message)
         return null;
     }
+}
+
+
+
+export function Logout() {
+  console.log("LOGOUT")
+  return new Promise((resolve, reject) => {
+    Alert.alert(
+      "Logout",
+      "Logging Out Requires the App to be Restarted. Are you sure you want to logout?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => reject(new Error("Leave session cancelled")),
+          style: "cancel"
+        },
+        {
+          text: "Yes",
+          onPress: async () => {
+            try {
+              await SecureStore.deleteItemAsync("accesstoken")
+              BackHandler.exitApp()
+              resolve(true)
+            } catch (e) {
+              console.log("ERROR LOGGING OUT", e.message)
+              reject(e)
+            }
+          }
+        }
+      ],
+      { cancelable: false }
+    );
+  });
 }

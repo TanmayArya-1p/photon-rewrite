@@ -11,6 +11,8 @@ import * as Notifications from 'expo-notifications';
 import * as sessionFlow from "../sessionFlow"
 import { validateAccessToken } from '../authFlow';
 import InitiateCard from '@/components/initiateCard';
+import * as MediaLibrary from 'expo-media-library';
+
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -32,6 +34,7 @@ export default function HomeScreen() {
   const [verified, setVerified] = useState(false)
   const [user,setUser] = useState(null)
   const [modalVisible, setModalVisible] = useState(false)
+  const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
 
   async function createSessionHandler(sesKey) {
     console.log("CREATE")
@@ -99,8 +102,10 @@ export default function HomeScreen() {
   }
 
   useEffect(() => {
+    console.log("REQUESTING PERMISSION")
+    requestPermission();
     //FIRST VERIFY IF BRO IS AUTHENTICATED
-
+    
     async function verify() {
       let accessToken = await SecureStorage.getItemAsync("accesstoken")
       let status = await validateAccessToken(accessToken)
@@ -131,6 +136,8 @@ export default function HomeScreen() {
     
   } , [setUser])
 
+
+
   // useEffect(() => {
   //   console.log("DEVICE ID" , Device.manufacturer)
   //   if(Device.manufacturer == "vivo"){
@@ -153,6 +160,7 @@ export default function HomeScreen() {
       <ActivityIndicator size={50} color="#0000ff" />
     </SafeAreaView>
   }
+
 
   return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center w-full">

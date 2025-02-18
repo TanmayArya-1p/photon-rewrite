@@ -16,6 +16,8 @@ export default function LoginPage(props) {
     let [loading, setLoading] = useState(false)
 
     useEffect(() => {
+        console.log("REDIRECTED")
+
         if(response && response.type === "success") {
             retrieveAuthToken(response.params.code, request.codeVerifier).then((tokenResponse) => {
                 console.log(jwtDecode(tokenResponse))
@@ -49,6 +51,7 @@ export default function LoginPage(props) {
                 <Ionicons name="logo-github" size={24} color="black" />
             </TouchableOpacity>
         </View>
+        
     </SafeAreaView>
     </>
 }
