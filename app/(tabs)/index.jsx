@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform , View,Text, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { Image, StyleSheet, Platform , View,Text, SafeAreaView, ActivityIndicator, Alert} from 'react-native';
 import {useState , useEffect} from 'react'
 import {useRouter} from 'expo-router'
 import * as SecureStorage from "expo-secure-store"
@@ -12,6 +12,8 @@ import * as sessionFlow from "../sessionFlow"
 import { validateAccessToken } from '../authFlow';
 import InitiateCard from '@/components/initiateCard';
 import * as MediaLibrary from 'expo-media-library';
+import * as Haptics from 'expo-haptics';
+
 
 
 Notifications.setNotificationHandler({

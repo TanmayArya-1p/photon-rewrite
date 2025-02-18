@@ -1,4 +1,4 @@
-import {View, Text , TouchableOpacity, TextInput , StyleSheet, Button, Alert , Modal} from 'react-native'
+import {View, Text , TouchableOpacity, TextInput , StyleSheet, Button, Alert , Modal,Vibration } from 'react-native'
 import { useEffect } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -34,6 +34,7 @@ export default function InitiateCard({createSessionHandler , joinSessionHandler,
       setScanned(true);
       setScannerOpened(false)
       setConnectionString(data);
+      Vibration.vibrate(100)
       setScanned(false)
     };
 
