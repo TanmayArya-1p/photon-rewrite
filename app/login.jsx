@@ -7,14 +7,15 @@ import { authConfig, discovery } from "./authConfig";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link } from "@react-navigation/native";
 import { LinearGradient } from 'expo-linear-gradient';
-
+import { useRouter } from "expo-router";
 
 
 
 export default function LoginPage(props) {
     let [request, response, promptAsync] = AuthSession.useAuthRequest(authConfig, discovery)
     let [loading, setLoading] = useState(false)
-
+    let router = useRouter()
+    
     useEffect(() => {
         console.log("REDIRECTED")
 
@@ -22,6 +23,7 @@ export default function LoginPage(props) {
             retrieveAuthToken(response.params.code, request.codeVerifier).then((tokenResponse) => {
                 console.log(jwtDecode(tokenResponse))
                 setLoading(false)
+                router.navigate("/")
             }).catch(e => console.log("ERROR PARSING JWT OF AUTHCODE " , e.message))
         }
     } , [response])
