@@ -7,6 +7,7 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import HeaderComponent from "@/components/header"
 
 
 export default function TabLayout() {
@@ -18,7 +19,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: true,
         headerStyle: { backgroundColor: "#fcfced" },
-        headerTitle: ()=> <Link href="/"><Image source={require("@/assets/images/photon-text.png")} style={{width: 150 , height: 30}}/></Link>,
+        headerTitle: ()=> <HeaderComponent />,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {

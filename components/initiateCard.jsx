@@ -1,4 +1,4 @@
-import {View, Text , TouchableOpacity, TextInput , StyleSheet, Button, Alert , Modal,Vibration } from 'react-native'
+import {View, Text , TouchableOpacity, TextInput , StyleSheet, Button, Alert , Modal,Vibration, ActivityIndicator } from 'react-native'
 import { useEffect } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,6 +16,7 @@ export default function InitiateCard({createSessionHandler , joinSessionHandler,
     const [scannerOpened , setScannerOpened] = useState(false)
     // const [modalVisible , setModalVisible] = useState(false)
     const [modalSesKey, setModalSesKey] = useState("")
+    const [loadingJoin, setLoadingJoin] = useState(false)
   
     useEffect(() => {
       const getCameraPermissions = async () => {
@@ -99,12 +100,20 @@ export default function InitiateCard({createSessionHandler , joinSessionHandler,
                     </TouchableOpacity>
                 </View>
                 
-                <TouchableOpacity onPress={() => joinSessionHandler(connectionString)} className="p-2 shadow-xl mt-1">
+                <TouchableOpacity onPress={() => {
+                  setLoadingJoin(true)
+                  joinSessionHandler(connectionString).then((_)=>{
+                    setLoadingJoin(false)
+                  })
+                  .catch((_) => setLoadingJoin(false))
+                  
+                  }} className="p-2 shadow-xl mt-1">
                     <LinearGradient
                         className="flex-row justify-center items-center p-2"
                         style={{ borderRadius: 7 }}
                         colors={['#00288a', '#2c4991']}
-                    >
+                    >   
+                        {loadingJoin ? <ActivityIndicator size={24} color={"#ffffff"} className="mr-2"/> : <></>}
                         <Text className="text-white font-extrabold p-1 text-xl text-center">Join Session</Text>
                         <Ionicons name="log-in-outline" size={24} color="white" />
                     </LinearGradient>
