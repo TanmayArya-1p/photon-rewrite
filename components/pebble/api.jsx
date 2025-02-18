@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {SERVER_URL , RELAY_URL} from "./config.json"
 import { userStore , sessionStore } from './stores'
-
+import {terminateAllTasks} from "./background-fetch"    
 
 async function login(uid,pwd) {
     let data = new FormData();
@@ -140,7 +140,7 @@ async function leaveSession(sid) {
             'secret': secret
         }
     };
-
+    terminateAllTasks()
     try {
         let resp = await axios.request(config)
         await sessionStore.setState({sesID: "" , sesKey: ""})

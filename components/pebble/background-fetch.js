@@ -4,7 +4,7 @@ import * as Notifications from 'expo-notifications';
 import {PollerD} from "./dispatcher-poller"
 import {PollerRH} from "./RequestHandler"
 import {BACKGROUND_POLL_INTERVAL} from "./config.json"
-
+import {CurrentNotificationIDStore} from "./stores"
 
 const BACKGROUND_DISPATCHER_TASK = "photon-dispatcher"
 const BACKGROUND_REQUEST_HANDLER_TASK = "photon-request-handler"
@@ -65,9 +65,11 @@ TaskManager.defineTask(BACKGROUND_REQUEST_HANDLER_TASK, () => {
 
 
 async function terminateAllTasks() {
-    await BackgroundFetch.unregisterTaskAsync(BACKGROUND_DISPATCHER_TASK);
-    await BackgroundFetch.unregisterTaskAsync(BACKGROUND_REQUEST_HANDLER_TASK);
-    notificationSent = false;
+  let currentNotificationID = await CurrentNotificationIDStore.getState().currentNotificationID
+  Notifications.dismissNotificationAsync(currentNotificationID) 
+  await BackgroundFetch.unregisterTaskAsync(BACKGROUND_DISPATCHER_TASK);
+  await BackgroundFetch.unregisterTaskAsync(BACKGROUND_REQUEST_HANDLER_TASK);
+  notificationSent = false;
 }
 
 

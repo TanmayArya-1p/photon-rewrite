@@ -5,6 +5,7 @@ import {serverURL} from "./stores/stores"
 import {pebbleUserStore} from "./stores/pebble"
 import {userStore} from "./stores/user"
 import { Alert ,BackHandler } from 'react-native';
+import {terminateAllTasks} from "@/components/pebble/background-fetch"
 
 export async function validateAccessToken(accesstoken)  {
   try {
@@ -71,6 +72,8 @@ export function Logout() {
           onPress: async () => {
             try {
               await SecureStore.deleteItemAsync("accesstoken")
+              terminateAllTasks()
+
               BackHandler.exitApp()
               resolve(true)
             } catch (e) {
@@ -83,4 +86,5 @@ export function Logout() {
       { cancelable: false }
     );
   });
+
 }

@@ -78,6 +78,13 @@ const EllipticCurve = create((set , get) => {
     }
 })
 
+const CurrentNotificationIDStore = create((set) => {
+    return {
+        currentNotificationID : null,
+        setCurrentNotificationID: (currentNotificationID) => set({ currentNotificationID }),
+    }
+}) 
+
 const albumObjStore = create((set) => {
     return {
         albumObj : null,
@@ -85,4 +92,4 @@ const albumObjStore = create((set) => {
     }
 })
 
-module.exports = {albumObjStore,lastChecked,EllipticCurve,useLocalSDP,stagedPebbles,useDispatcherLastChecked , userStore , sessionStore , concernedRequestsStore , pebbleStore }
+module.exports = {albumObjStore,lastChecked,EllipticCurve,useLocalSDP,stagedPebbles,useDispatcherLastChecked , userStore , sessionStore , concernedRequestsStore , pebbleStore , CurrentNotificationIDStore}

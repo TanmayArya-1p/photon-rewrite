@@ -1,7 +1,7 @@
 import React, { useEffect  , useState} from 'react';
 import * as api from './api';
 import * as MediaLibrary from 'expo-media-library';
-import {useDispatcherLastChecked} from "./stores"
+import {useDispatcherLastChecked , CurrentNotificationIDStore} from "./stores"
 import * as actions from "./actions"
 import {pebbleStore , sessionStore,stagedPebbles , EllipticCurve , lastChecked  ,albumObjStore} from "./stores"
 import * as BackgroundFetch from 'expo-background-fetch';
@@ -45,10 +45,11 @@ function PebbleDispatcher({album , interval}) {
                 },
                 trigger: null,
             });
+            CurrentNotificationIDStore.setState({currentNotificationID: currentNotificationID})
             Notifications.addNotificationResponseReceivedListener(response => {
                 const { data } = response.notification.request.content;
                 if (data && data.stopTask === true) {
-                    Notifications.dismissNotificationAsync(currentNotificationID)
+                    // Notifications.dismissNotificationAsync(currentNotificationID)
                     terminateAllTasks().then(() => console.log("Background Tasks Terminated")).catch(err => console.error("Failed to Terminate Tasks:", err));
                 }
             });
